@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% block title %}Résultat du diagnostic — CodeMentor AI{% endblock %}
+
+{% block content %}
+<div class="diag-wrapper">
+  <div class="diag-header" style="text-align:center">
+    <h1>Diagnostic terminé !</h1>
+  </div>
+
+  <div class="card" style="max-width:480px;margin:2rem auto;text-align:center">
+    <div style="font-size:3rem;margin-bottom:0.5rem">
+      {% if score == total %}🏆{% elif score > 1 %}👍{% else %}💪{% endif %}
+    </div>
+    <h2 style="margin:0 0 0.5rem">{{ score }} / {{ total }}</h2>
+    <p style="color:var(--wh2)">
+      {% if score == total %}
+        Parfait ! Niveau expert !
+      {% elif score > total|add:"-2" %}
+        Excellent niveau !
+      {% elif score >= 2 %}
+        Bonnes bases, continue comme ça !
+      {% else %}
+        Continue à apprendre, tu vas progresser !
+      {% endif %}
+    </p>
+    <div style="margin-top:1.5rem;display:flex;gap:0.75rem;justify-content:center">
+      <a href="{% url 'dashboard' %}" class="btn btn-primary">Mon dashboard</a>
+      <a href="{% url 'cours_list' %}" class="btn btn-ghost">Voir les cours →</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

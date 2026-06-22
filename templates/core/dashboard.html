@@ -1,0 +1,107 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard — CodeMentor AI{% endblock %}
+
+{% block content %}
+<div class="page-content">
+
+  <div class="dash-header">
+    <div class="user-row">
+      <div class="avatar">{{ user.username|upper|slice:":2" }}</div>
+      <div>
+        <div class="greet-name">Bienvenue, {{ user.username }} 👋</div>
+        <div class="greet-sub">Niveau {{ profil.niveau }} · {{ profil.get_niveau_display }} · {{ profil.points }} XP</div>
+      </div>
+    </div>
+    <a href="{% url 'cours_list' %}" class="btn btn-primary">Continuer l'apprentissage →</a>
+  </div>
+
+  <!-- Métriques -->
+  <div class="metrics-block">
+    <div class="metric">
+      <div class="metric-val gold">{{ profil.points }}</div>
+      <div class="metric-lab">Points XP</div>
+    </div>
+    <div class="metric">
+      <div class="metric-val">{{ cours_termines }}</div>
+      <div class="metric-lab">Cours terminés</div>
+    </div>
+    <div class="metric">
+      <div class="metric-val">{{ exercices_reussis }}</div>
+      <div class="metric-lab">Exercices réussis</div>
+    </div>
+    <div class="metric">
+      <div class="metric-val gold">{{ serie_jours }}</div>
+      <div class="metric-lab">Jours consécutifs</div>
+    </div>
+  </div>
+
+  <!-- Progression -->
+  <div class="card" style="margin-bottom:12px">
+    <div class="card-title">Progression par module</div>
+    {% for prog in progression %}
+    <div class="prog-wrap">
+      <div class="prog-label">
+        <span>{{ prog.cours.titre }}</span>
+        <span class="prog-pct" style="color:{% if prog.pourcentage == 100 %}var(--wh2){% elif prog.pourcentage > 0 %}var(--gold){% else %}var(--mu2){% endif %}">
+          {{ prog.pourcentage }}%
+        </span>
+      </div>
+      <div class="prog-track">
+        <div class="prog-fill {% if prog.pourcentage == 100 %}prog-fill-white{% elif prog.pourcentage > 0 %}prog-fill-gold{% else %}prog-fill-muted{% endif %}"
+             style="width:{{ prog.pourcentage }}%"></div>
+      </div>
+    </div>
+    {% empty %}
+    <p style="color:var(--mu);font-size:13px">Commence un cours pour voir ta progression ici.</p>
+    {% endfor %}
+  </div>
+
+  <div class="grid-2">
+
+    <!-- Activité récente -->
+    <div class="card">
+      <div class="card-title">Activité récente</div>
+      <ul class="act-list">
+        {% for act in activites_recentes %}
+        <li>
+          <div class="act-bar" style="background:{% if act.type == 'cours' %}var(--wh){% elif act.type == 'exercice' %}var(--gold){% else %}var(--mu){% endif %}"></div>
+          {{ act.description }}
+          <span class="act-time">{{ act.date|timesince }}</span>
+        </li>
+        {% empty %}
+        <li style="color:var(--mu)">Aucune activité récente</li>
+        {% endfor %}
+      </ul>
+    </div>
+
+    <!-- Roadmap -->
+    <div class="card">
+      <div class="card-title">Roadmap</div>
+      <div class="rm-list">
+        {% for etape in roadmap %}
+        <div class="rm-item {{ etape.statut }}">
+          <div class="rm-ico">
+            {% if etape.statut == 'done' %}✓{% elif etape.statut == 'current' %}NOW{% else %}—{% endif %}
+          </div>
+          <span>{{ etape.titre }}</span>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+  </div>
+
+  {% if peut_passer_examen %}
+  <div class="card" style="margin-top:12px;border-color:rgba(212,168,67,0.3);background:rgba(212,168,67,0.05)">
+    <div style="display:flex;align-items:center;justify-content:space-between">
+      <div>
+        <div class="card-title" style="color:var(--gold)">Examen final disponible</div>
+        <div style="font-size:13px;color:var(--wh2)">Tu as terminé tous les modules requis. Bonne chance !</div>
+      </div>
+      <a href="{% url 'examen' %}" class="btn btn-gold">Passer l'examen</a>
+    </div>
+  </div>
+  {% endif %}
+
+</div>
+{% endblock %}

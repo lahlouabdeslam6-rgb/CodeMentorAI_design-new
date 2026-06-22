@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+{% block title %}{{ cours.titre }} — CodeMentor AI{% endblock %}
+
+{% block content %}
+<div class="page-content">
+
+  <a href="{% url 'cours_list' %}" class="btn btn-ghost" style="margin-bottom:1rem">← Retour aux cours</a>
+
+  <div class="card" style="margin-bottom:1.5rem">
+    <div style="font-size:2.5rem;margin-bottom:0.5rem">{{ cours.emoji }}</div>
+    <h2 style="margin:0 0 0.25rem">{{ cours.titre }}</h2>
+    <span class="badge {% if cours.niveau == 'debutant' %}badge-white{% elif cours.niveau == 'intermediaire' %}badge-gold{% else %}badge-muted{% endif %}">
+      {{ cours.get_niveau_display|upper }}
+    </span>
+    <p style="margin-top:1rem;color:var(--wh2)">{{ cours.description }}</p>
+
+    <div style="margin-top:1rem">
+      <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px">
+        <span>Progression</span>
+        <span>{{ progression.pourcentage }}%</span>
+      </div>
+      <div class="prog-track">
+        <div class="prog-fill {% if progression.pourcentage == 100 %}prog-fill-white{% elif progression.pourcentage > 0 %}prog-fill-gold{% else %}prog-fill-muted{% endif %}"
+             style="width:{{ progression.pourcentage }}%"></div>
+      </div>
+    </div>
+  </div>
+
+  <h3>Exercices liés</h3>
+  <div class="exo-list">
+    {% for exo in exercices %}
+    <a href="{% url 'exercice_detail' exo.id %}" class="exo-item">
+      <div class="exo-ico">
+        {% if exo.resolu %}✅{% elif exo.difficulte == 'facile' %}🟢{% elif exo.difficulte == 'moyen' %}🟡{% else %}🔴{% endif %}
+      </div>
+      <div class="exo-info">
+        <h4>
+          {{ exo.titre }}
+          <span class="diff {% if exo.difficulte == 'facile' %}diff-easy{% elif exo.difficulte == 'moyen' %}diff-medium{% else %}diff-hard{% endif %}">
+            {{ exo.get_difficulte_display|upper }}
+          </span>
+        </h4>
+        <p>{{ exo.categorie }} · {% if exo.resolu %}Résolu{% else %}À faire{% endif %}</p>
+      </div>
+      <div class="exo-xp">+{{ exo.points }} XP</div>
+    </a>
+    {% empty %}
+    <p style="color:var(--mu);font-size:13px">Aucun exercice pour ce module.</p>
+    {% endfor %}
+  </div>
+
+</div>
+{% endblock %}

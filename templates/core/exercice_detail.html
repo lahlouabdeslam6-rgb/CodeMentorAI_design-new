@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+{% block title %}{{ exercice.titre }} — CodeMentor AI{% endblock %}
+
+{% block content %}
+<div class="page-content">
+
+  <a href="{% url 'cours_list' %}" class="btn btn-ghost" style="margin-bottom:1rem">← Retour aux cours</a>
+
+  <div class="card">
+    <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:1rem">
+      <span style="font-size:1.5rem">
+        {% if exercice.difficulte == 'facile' %}🟢{% elif exercice.difficulte == 'moyen' %}🟡{% else %}🔴{% endif %}
+      </span>
+      <div>
+        <h2 style="margin:0">{{ exercice.titre }}</h2>
+        <span class="diff {% if exercice.difficulte == 'facile' %}diff-easy{% elif exercice.difficulte == 'moyen' %}diff-medium{% else %}diff-hard{% endif %}">
+          {{ exercice.get_difficulte_display|upper }}
+        </span>
+        <span style="color:var(--gold);font-size:13px;margin-left:0.5rem">+{{ exercice.points }} XP</span>
+      </div>
+    </div>
+
+    <div style="background:var(--bg3);padding:1rem;border-radius:6px;margin-bottom:1.5rem;white-space:pre-wrap;font-family:'Fira Code',monospace;font-size:14px;color:var(--wh2)">
+      {{ exercice.enonce }}
+    </div>
+
+    {% if resolution.resolu %}
+      <div class="alert alert-success" style="background:rgba(212,168,67,0.1);border:1px solid rgba(212,168,67,0.3);padding:0.75rem 1rem;border-radius:6px;color:var(--gold)">
+        ✅ Exercice déjà résolu !
+      </div>
+    {% else %}
+      <form method="post">
+        {% csrf_token %}
+        <div class="form-group">
+          <label class="form-label">Ta réponse</label>
+          <textarea name="reponse" class="form-control" rows="6" placeholder="Écris ta solution ici…" required style="font-family:'Fira Code',monospace;font-size:14px"></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">Soumettre</button>
+      </form>
+    {% endif %}
+  </div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+{% block title %}Diagnostic — CodeMentor AI{% endblock %}
+
+{% block content %}
+<div class="diag-wrapper">
+
+  <div class="diag-header">
+    <div class="diag-step">ÉTAPE {{ question_num }} / {{ total_questions }}</div>
+    <h1>Test diagnostique</h1>
+    <div class="prog-track" style="height:3px;margin-top:10px">
+      <div class="prog-fill prog-fill-gold" style="width:{{ progression_pct }}%"></div>
+    </div>
+  </div>
+
+  <div class="question-card">
+    <div class="question-text">{{ question.texte }}</div>
+
+    {% if question.code %}
+    <div class="code-block" style="margin-bottom:1.25rem">
+      <div class="code-header">
+        <div class="dot dot-r"></div>
+        <div class="dot dot-y"></div>
+        <div class="dot dot-g"></div>
+        <span class="code-filename">exemple.js</span>
+      </div>
+      <pre style="color:var(--wh2)">{{ question.code }}</pre>
+    </div>
+    {% endif %}
+
+    <form method="post">
+      {% csrf_token %}
+      <input type="hidden" name="question_id" value="{{ question.id }}">
+      <div class="options-list">
+        {% for option in question.options %}
+        <label class="option-label">
+          <input type="radio" name="reponse" value="{{ forloop.counter0 }}" required>
+          {{ option.texte }}
+        </label>
+        {% endfor %}
+      </div>
+      <button type="submit" class="btn btn-primary" style="margin-top:1.25rem">
+        {% if question_num == total_questions %}Terminer le diagnostic{% else %}Question suivante →{% endif %}
+      </button>
+    </form>
+  </div>
+
+</div>
+{% endblock %}

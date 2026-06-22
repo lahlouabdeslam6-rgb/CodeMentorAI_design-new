@@ -1,0 +1,100 @@
+{% extends 'base.html' %}
+{% block title %}Tuteur IA — CodeMentor AI{% endblock %}
+
+{% block content %}
+<div class="chat-wrapper">
+
+  <div class="chat-header">
+    <div class="chat-ai-avatar">🤖</div>
+    <div>
+      <div class="chat-ai-name">Mentor JS</div>
+      <div class="chat-ai-status"><span class="online-dot"></span>En ligne · Expert JavaScript</div>
+    </div>
+  </div>
+
+  <div class="chat-messages" id="chat-messages">
+    <!-- Message de bienvenue -->
+    <div class="msg ai">
+      <div class="msg-avatar">AI</div>
+      <div>
+        <div class="msg-bubble">
+          Salut {{ user.username }} ! 👋 Je suis ton tuteur IA spécialisé en JavaScript.
+          {% if sujet_actuel %}
+            Je vois que tu travailles sur <strong>{{ sujet_actuel }}</strong>.
+          {% endif %}
+          Qu'est-ce que tu veux approfondir ?
+        </div>
+      </div>
+    </div>
+
+    <!-- Historique de la session -->
+    {% for msg in historique %}
+    <div class="msg {{ msg.role }}">
+      <div class="msg-avatar">{% if msg.role == 'ai' %}AI{% else %}{{ user.username|upper|slice:":2" }}{% endif %}</div>
+      <div>
+        <div class="msg-bubble">{{ msg.contenu|linebreaksbr }}</div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <div class="chat-bottom">
+    <div class="chat-chips">
+      <button class="chip" onclick="fillChip(this)">Expliquer un concept</button>
+      <button class="chip" onclick="fillChip(this)">Déboguer mon code</button>
+      <button class="chip" onclick="fillChip(this)">Exercice pratique</button>
+      <button class="chip" onclick="fillChip(this)">Voir ma roadmap</button>
+    </div>
+    <form method="post" action="{% url 'tuteur_message' %}" id="chat-form">
+      {% csrf_token %}
+      <div class="chat-input-row">
+        <textarea
+          class="chat-field"
+          name="message"
+          id="chat-field"
+          rows="1"
+          placeholder="Pose ta question en français…"
+          onkeydown="handleKey(event)"
+          autofocus
+        ></textarea>
+        <button type="submit" class="send-btn" aria-label="Envoyer">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#080808" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="22" y1="2" x2="11" y2="13"/>
+            <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+          </svg>
+        </button>
+      </div>
+    </form>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  function handleKey(e) {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      document.getElementById('chat-form').submit();
+    }
+  }
+
+  function fillChip(btn) {
+    document.getElementById('chat-field').value = btn.textContent.trim();
+    document.getElementById('chat-field').focus();
+  }
+
+  // Auto-scroll vers le bas
+  const msgs = document.getElementById('chat-messages');
+  if (msgs) msgs.scrollTop = msgs.scrollHeight;
+
+  // Auto-resize textarea
+  const field = document.getElementById('chat-field');
+  if (field) {
+    field.addEventListener('input', function () {
+      this.style.height = 'auto';
+      this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+    });
+  }
+</script>
+{% endblock %}
