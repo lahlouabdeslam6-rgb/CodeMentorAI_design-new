@@ -1,0 +1,61 @@
+{% extends 'professor/base_professor.html' %}
+{% block title %}{% if edit %}Modifier{% else %}Créer{% endif %} un exercice — CodeMentor AI{% endblock %}
+{% block content %}
+<div class="page-content">
+
+  <a href="{% url 'professor_exercises' cours.slug %}" class="btn btn-ghost" style="margin-bottom:1rem">← Exercices</a>
+
+  <div class="card" style="max-width:650px">
+    <div class="card-title">{{ cours.titre }} · {% if edit %}Modifier l'exercice{% else %}Nouvel exercice{% endif %}</div>
+
+    <form method="post">
+      {% csrf_token %}
+      <div class="form-group">
+        <label class="form-label">Titre</label>
+        <input type="text" name="titre" class="form-control" value="{{ exercice.titre|default:'' }}" required>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Leçon associée</label>
+        <select name="lesson_id" class="form-control" required>
+          <option value="">— Sélectionner une leçon —</option>
+          {% for l in lessons %}
+          <option value="{{ l.id }}" {% if exercice.lesson and exercice.lesson.id == l.id %}selected{% endif %}>
+            {{ l.titre }}
+          </option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Énoncé</label>
+        <textarea name="enonce" class="form-control" rows="6" style="font-family:var(--fc);font-size:13px">{{ exercice.enonce|default:'' }}</textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Correction</label>
+        <textarea name="correction" class="form-control" rows="6" style="font-family:var(--fc);font-size:13px">{{ exercice.correction|default:'' }}</textarea>
+      </div>
+      <div class="grid-3">
+        <div class="form-group">
+          <label class="form-label">Difficulté</label>
+          <select name="difficulte" class="form-control">
+            <option value="facile" {% if exercice.difficulte == 'facile' %}selected{% endif %}>Facile</option>
+            <option value="moyen" {% if exercice.difficulte == 'moyen' %}selected{% endif %}>Moyen</option>
+            <option value="difficile" {% if exercice.difficulte == 'difficile' %}selected{% endif %}>Difficile</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Catégorie</label>
+          <input type="text" name="categorie" class="form-control" value="{{ exercice.categorie|default:'Général' }}">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Points XP</label>
+          <input type="number" name="points" class="form-control" value="{{ exercice.points|default:'10' }}" min="1" max="100">
+        </div>
+      </div>
+      <button type="submit" class="btn btn-primary">
+        {% if edit %}Enregistrer{% else %}Créer l'exercice{% endif %}
+      </button>
+    </form>
+  </div>
+
+</div>
+{% endblock %}

@@ -1,62 +1,305 @@
 {% extends 'base.html' %}
-{% block title %}CodeMentor AI — Apprends JavaScript{% endblock %}
+{% load static %}
+{% block title %}CodeMentor AI — Apprends à coder avec un parcours intelligent{% endblock %}
+{% block extra_css %}
+<style>
+/* ── Hero ── */
+.hero { min-height:85vh; display:flex; align-items:center; padding:5rem 2rem 3rem; position:relative; overflow:hidden; }
+.hero .grid-lines { position:absolute; inset:0; background-image:linear-gradient(rgba(255,255,255,0.025) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.025) 1px,transparent 1px); background-size:50px 50px; pointer-events:none; }
+.hero-content { position:relative; max-width:620px; z-index:1; }
+.hero h1 { font-family:var(--fd); font-size:clamp(2.6rem,5.5vw,4.2rem); font-weight:700; line-height:1.08; letter-spacing:-0.03em; margin-bottom:1.25rem; color:var(--wh); }
+.hero h1 .accent { color:#D4A63F; }
+.hero p { font-size:1.05rem; color:var(--mu); line-height:1.8; margin-bottom:2rem; max-width:480px; }
+.btn-row { display:flex; gap:12px; flex-wrap:wrap; margin-bottom:2.5rem; }
+.btn-gold { background:#D4A843; color:#080808; display:inline-flex; align-items:center; gap:8px; padding:13px 28px; border-radius:6px; font-size:15px; font-weight:500; font-family:var(--fb); cursor:pointer; border:none; text-decoration:none; transition:all 0.2s; }
+.btn-gold:hover { background:#F0C060; transform:translateY(-1px); }
+.btn-outline { display:inline-flex; align-items:center; gap:8px; padding:13px 28px; border-radius:6px; font-size:15px; font-weight:500; font-family:var(--fb); cursor:pointer; border:1px solid rgba(255,255,255,0.15); text-decoration:none; color:var(--wh); background:transparent; transition:all 0.2s; }
+.btn-outline:hover { background:rgba(255,255,255,0.05); border-color:rgba(255,255,255,0.25); }
+.stats-row { display:flex; gap:0; flex-wrap:wrap; padding-top:2rem; border-top:1px solid var(--bd); width:100%; }
+.stat-item { flex:1; min-width:100px; padding:0.5rem 1rem 0.5rem 0; }
+.stat-item:not(:last-child) { border-right:1px solid var(--bd); margin-right:1rem; }
+.stat-num { font-family:var(--fd); font-size:1.6rem; font-weight:700; letter-spacing:-0.04em; color:var(--wh); line-height:1; }
+.stat-num.gold { color:var(--gold); }
+.stat-lab { font-size:10px; color:var(--mu); margin-top:4px; letter-spacing:0.05em; text-transform:uppercase; }
+
+/* ── Sections communes ── */
+.section { padding:5rem 2rem; position:relative; }
+.section-inner { max-width:1000px; margin:0 auto; }
+.section-tag { font-family:var(--fc); font-size:10px; color:var(--gold); text-transform:uppercase; letter-spacing:0.1em; margin-bottom:0.75rem; }
+.section-title { font-family:var(--fd); font-size:clamp(1.6rem,3vw,2.4rem); font-weight:700; letter-spacing:-0.02em; color:var(--wh); margin-bottom:0.75rem; }
+.section-sub { font-size:15px; color:var(--mu); max-width:520px; line-height:1.7; margin-bottom:2.5rem; }
+
+/* ── Steps ── */
+.steps-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:1px; background:var(--bd); border:1px solid var(--bd); border-radius:10px; overflow:hidden; }
+.step-card { background:var(--bg2); padding:1.75rem; transition:background 0.2s; }
+.step-card:hover { background:rgba(255,255,255,0.02); }
+.step-num { font-family:var(--fc); font-size:12px; color:var(--gold); margin-bottom:0.75rem; }
+.step-card h3 { font-family:var(--fd); font-size:15px; font-weight:500; color:var(--wh); margin-bottom:6px; }
+.step-card p { font-size:12px; color:var(--mu); line-height:1.7; }
+.step-card ul { margin:6px 0 0; padding:0; list-style:none; }
+.step-card li { font-size:12px; color:var(--mu); line-height:1.7; padding-left:14px; position:relative; }
+.step-card li::before { content:'•'; position:absolute; left:0; color:var(--gold); }
+.step-card .check { color:#2ECC71; font-family:var(--fc); }
+
+/* ── Why cards ── */
+.why-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:12px; }
+.why-card { background:var(--bg2); border:1px solid var(--bd); border-radius:10px; padding:1.5rem; transition:all 0.25s; }
+.why-card:hover { border-color:rgba(212,168,67,0.2); transform:translateY(-3px); }
+.why-ico { font-size:2rem; margin-bottom:0.75rem; }
+.why-card h3 { font-family:var(--fd); font-size:14px; font-weight:500; color:var(--wh); margin-bottom:6px; }
+.why-card p { font-size:12px; color:var(--mu); line-height:1.6; }
+
+/* ── Progression flow ── */
+.flow-wrap { background:var(--bg2); border:1px solid var(--bd); border-radius:10px; padding:2.5rem 1.5rem; overflow-x:auto; }
+.flow-row { display:flex; align-items:center; justify-content:center; gap:0; min-width:600px; }
+.flow-step { display:flex; flex-direction:column; align-items:center; gap:6px; flex-shrink:0; }
+.flow-circle { width:56px; height:56px; border-radius:50%; background:var(--bg4); border:1px solid var(--bd2); display:flex; align-items:center; justify-content:center; font-size:1.3rem; transition:all 0.3s; }
+.flow-step:hover .flow-circle { border-color:var(--gold); background:rgba(212,168,67,0.08); }
+.flow-label { font-size:10px; color:var(--mu); text-transform:uppercase; letter-spacing:0.04em; text-align:center; white-space:nowrap; }
+.arrow { color:var(--mu2); font-size:1.2rem; margin:0 8px; flex-shrink:0; }
+.flow-end { width:56px; height:56px; border-radius:50%; background:rgba(212,168,67,0.1); border:1px solid var(--gold); display:flex; align-items:center; justify-content:center; font-size:1.3rem; }
+
+/* ── Footer ── */
+.site-footer { border-top:1px solid var(--bd); padding:3rem 2rem; background:var(--bg); }
+.footer-inner { max-width:1000px; margin:0 auto; display:flex; justify-content:space-between; gap:2rem; flex-wrap:wrap; }
+.footer-brand { max-width:260px; }
+.footer-brand .logo { font-family:var(--fd); font-weight:700; font-size:1.1rem; display:flex; align-items:center; gap:9px; color:var(--wh); margin-bottom:8px; }
+.footer-brand p { font-size:12px; color:var(--mu); line-height:1.6; }
+.footer-links { display:flex; gap:2rem; }
+.footer-links a { display:block; font-size:13px; color:var(--mu); text-decoration:none; padding:3px 0; transition:color 0.15s; }
+.footer-links a:hover { color:var(--wh); }
+
+/* ── Animations ── */
+.reveal { opacity:0; transform:translateY(30px); transition:all 0.6s ease; }
+.reveal.visible { opacity:1; transform:translateY(0); }
+
+@media (max-width:680px) {
+  .hero { min-height:auto; padding:3rem 1.5rem 2rem; }
+  .stat-item { min-width:80px; }
+  .stat-item:not(:last-child) { border-right:none; }
+  .steps-grid { grid-template-columns:1fr; }
+  .flow-row { min-width:auto; flex-wrap:wrap; justify-content:center; gap:6px; }
+  .arrow { transform:rotate(90deg); margin:4px 0; }
+  .footer-inner { flex-direction:column; }
+}
+</style>
+{% endblock %}
 
 {% block content %}
+
+<!-- ══════════════════════════════════════
+     HERO
+     ══════════════════════════════════════ -->
 <div class="hero">
   <div class="grid-lines"></div>
-  <div class="hero-content">
-    <div class="hero-badge">
-      <span class="badge-dot"></span>
-      v2.0 — PFA Ismail Lahlou
-    </div>
-    <h1>Apprends<br><span class="accent">JavaScript</span><br>intelligemment.</h1>
-    <p>Plateforme adaptative avec diagnostic de niveau, cours structurés, exercices corrigés automatiquement et tuteur IA pédagogique.</p>
+  <div class="hero-content reveal">
+    <h1>Apprends à <span class="accent">coder</span><br>avec un parcours intelligent.</h1>
+    <p>Une plateforme d'apprentissage alimentée par l'IA qui évalue ton niveau, personnalise ton parcours et t'accompagne jusqu'à la réussite.</p>
     <div class="btn-row">
       {% if user.is_authenticated %}
-        <a href="{% url 'dashboard' %}" class="btn btn-primary">Mon Dashboard</a>
-        <a href="{% url 'cours_list' %}" class="btn btn-ghost">Voir les cours →</a>
+        <a href="{% url 'dashboard' %}" class="btn-gold">🚀 Mon Dashboard</a>
+        <a href="{% url 'cours_list' %}" class="btn-outline">📚 Voir les cours →</a>
       {% else %}
-        <a href="{% url 'register' %}" class="btn btn-primary">Commencer maintenant</a>
-        <a href="{% url 'login' %}" class="btn btn-ghost">Se connecter →</a>
+        <a href="{% url 'register' %}" class="btn-gold">🚀 Commencer maintenant</a>
+        <a href="{% url 'login' %}" class="btn-outline">🔑 Se connecter</a>
       {% endif %}
     </div>
     <div class="stats-row">
-      <div>
-        <div class="stat-num">12</div>
-        <div class="stat-lab">Modules</div>
+      <div class="stat-item">
+        <div class="stat-num">{{ total_formations }}</div>
+        <div class="stat-lab">📚 Formations</div>
       </div>
-      <div>
-        <div class="stat-num">48</div>
-        <div class="stat-lab">Exercices</div>
+      <div class="stat-item">
+        <div class="stat-num">{{ total_lessons }}</div>
+        <div class="stat-lab">📖 Leçons</div>
       </div>
-      <div>
-        <div class="stat-num" style="color:var(--gold)">IA</div>
-        <div class="stat-lab">Tuteur 24/7</div>
+      <div class="stat-item">
+        <div class="stat-num">{{ total_exercices }}</div>
+        <div class="stat-lab">📝 Exercices</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num">{{ total_examens }}</div>
+        <div class="stat-lab">🎓 Examens</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num gold">IA</div>
+        <div class="stat-lab">🤖 Disponible 24/7</div>
       </div>
     </div>
   </div>
 </div>
 
-<div class="features-grid">
-  <div class="feature-card">
-    <div class="feature-num">01 — DIAGNOSTIC</div>
-    <h3>Test adaptatif</h3>
-    <p>Évalue ton niveau à l'entrée et personnalise ton parcours d'apprentissage.</p>
-  </div>
-  <div class="feature-card">
-    <div class="feature-num">02 — COURS</div>
-    <h3>Modules structurés</h3>
-    <p>12 modules JS organisés du débutant jusqu'à l'expert.</p>
-  </div>
-  <div class="feature-card">
-    <div class="feature-num">03 — EXERCICES</div>
-    <h3>Correction automatique</h3>
-    <p>48 exercices avec correction immédiate et points XP à la clé.</p>
-  </div>
-  <div class="feature-card">
-    <div class="feature-num">04 — TUTEUR IA</div>
-    <h3>Questions 24/7</h3>
-    <p>Pose tes questions en français, reçois des explications claires et des exemples de code.</p>
+<!-- ══════════════════════════════════════
+     COMMENT ÇA MARCHE
+     ══════════════════════════════════════ -->
+<div class="section" style="background:var(--bg2);border-top:1px solid var(--bd);border-bottom:1px solid var(--bd)">
+  <div class="section-inner">
+    <div class="reveal">
+      <div class="section-tag">Fonctionnement</div>
+      <h2 class="section-title">Comment ça marche ?</h2>
+      <p class="section-sub">Un parcours en 5 étapes conçu pour t'accompagner de la découverte jusqu'à la maîtrise.</p>
+    </div>
+    <div class="steps-grid reveal">
+      <div class="step-card">
+        <div class="step-num">① — Test de niveau</div>
+        <h3>Évaluation par matière</h3>
+        <p>Chaque matière possède son propre test de niveau. Le test est obligatoire avant d'accéder aux cours.</p>
+        <ul>
+          <li>Débutant</li>
+          <li>Intermédiaire</li>
+          <li>Avancé</li>
+        </ul>
+      </div>
+      <div class="step-card">
+        <div class="step-num">② — Parcours personnalisé</div>
+        <h3>Contenu adapté</h3>
+        <p>Après le test, tu débloques les cours correspondant à ton niveau. Chaque matière possède ses propres cours, leçons, exercices et examen.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-num">③ — Exercices intelligents</div>
+        <h3>Pratique par leçon</h3>
+        <p>Chaque leçon possède ses propres exercices avec correction immédiate. Les XP sont gagnés uniquement dans la matière concernée.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-num">④ — Examen par matière</div>
+        <h3>Validation des acquis</h3>
+        <p>Chaque matière possède son propre examen. Conditions&nbsp;:</p>
+        <ul>
+          <li><span class="check">✔</span> 8 exercices terminés</li>
+          <li><span class="check">✔</span> Conditions remplies</li>
+        </ul>
+        <p style="margin-top:6px">Récompense&nbsp;: <strong style="color:var(--gold)">+100 XP</strong> dans cette matière uniquement.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-num">⑤ — Tuteur IA</div>
+        <h3>Assistant pédagogique</h3>
+        <p>Disponible 24h/24, il répond uniquement avec le contenu enseigné dans la plateforme. Il propose également des ressources et des liens pour approfondir les notions.</p>
+      </div>
+    </div>
   </div>
 </div>
+
+<!-- ══════════════════════════════════════
+     POURQUOI CODEMENTOR AI
+     ══════════════════════════════════════ -->
+<div class="section">
+  <div class="section-inner">
+    <div class="reveal">
+      <div class="section-tag">Pourquoi nous</div>
+      <h2 class="section-title">Pourquoi CodeMentor AI ?</h2>
+      <p class="section-sub">Une approche moderne de l'apprentissage du développement informatique.</p>
+    </div>
+    <div class="why-grid reveal">
+      <div class="why-card">
+        <div class="why-ico">🎯</div>
+        <h3>Test adaptatif</h3>
+        <p>Chaque matière commence par un test de niveau qui détermine ton point de départ idéal.</p>
+      </div>
+      <div class="why-card">
+        <div class="why-ico">📚</div>
+        <h3>Parcours structuré</h3>
+        <p>Cours organisés du niveau débutant jusqu'au niveau avancé, avec une progression logique.</p>
+      </div>
+      <div class="why-card">
+        <div class="why-ico">🤖</div>
+        <h3>IA pédagogique</h3>
+        <p>Explications simples, exemples de code, ressources complémentaires — un vrai assistant.</p>
+      </div>
+      <div class="why-card">
+        <div class="why-ico">🏆</div>
+        <h3>Progression par matière</h3>
+        <p>Chaque matière possède son propre niveau, ses XP, ses exercices et son examen final.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     VOTRE PROGRESSION
+     ══════════════════════════════════════ -->
+<div class="section" style="background:var(--bg2);border-top:1px solid var(--bd);border-bottom:1px solid var(--bd)">
+  <div class="section-inner">
+    <div class="reveal">
+      <div class="section-tag">Parcours</div>
+      <h2 class="section-title">Votre progression</h2>
+      <p class="section-sub">Chaque matière suit le même parcours d'apprentissage, du test initial jusqu'à la certification.</p>
+    </div>
+    <div class="flow-wrap reveal">
+      <div class="flow-row">
+        <div class="flow-step">
+          <div class="flow-circle">📋</div>
+          <div class="flow-label">Test</div>
+        </div>
+        <div class="arrow">→</div>
+        <div class="flow-step">
+          <div class="flow-circle">📚</div>
+          <div class="flow-label">Cours</div>
+        </div>
+        <div class="arrow">→</div>
+        <div class="flow-step">
+          <div class="flow-circle">📖</div>
+          <div class="flow-label">Leçons</div>
+        </div>
+        <div class="arrow">→</div>
+        <div class="flow-step">
+          <div class="flow-circle">✍️</div>
+          <div class="flow-label">Exercices</div>
+        </div>
+        <div class="arrow">→</div>
+        <div class="flow-step">
+          <div class="flow-circle">📝</div>
+          <div class="flow-label">Examen</div>
+        </div>
+        <div class="arrow">→</div>
+        <div class="flow-step">
+          <div class="flow-end">🎓</div>
+          <div class="flow-label" style="color:var(--gold)">Certification</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     FOOTER
+     ══════════════════════════════════════ -->
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <div class="logo">
+        <div class="logo-sq"><span>CM</span></div>
+        CodeMentor AI
+      </div>
+      <p>Plateforme intelligente d'apprentissage du développement informatique.</p>
+    </div>
+    <div class="footer-links">
+      <div>
+        <div style="font-size:10px;color:var(--mu2);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;font-family:var(--fc)">Liens</div>
+        <a href="{% url 'home' %}">Accueil</a>
+        <a href="{% url 'login' %}">Connexion</a>
+        <a href="{% url 'register' %}">Inscription</a>
+      </div>
+      <div>
+        <div style="font-size:10px;color:var(--mu2);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;font-family:var(--fc)">Support</div>
+        <a href="#">À propos</a>
+        <a href="#">Contact</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<!-- ══════════════════════════════════════
+     SCROLL REVEAL
+     ══════════════════════════════════════ -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const observer = new IntersectionObserver(function(entries) {
+    entries.forEach(function(e) {
+      if (e.isIntersecting) { e.target.classList.add('visible'); }
+    });
+  }, { threshold: 0.15 });
+  document.querySelectorAll('.reveal').forEach(function(el) { observer.observe(el); });
+});
+</script>
+
 {% endblock %}

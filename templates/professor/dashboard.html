@@ -1,0 +1,223 @@
+{% extends 'professor/base_professor.html' %}
+{% block title %}Professor Dashboard — CodeMentor AI{% endblock %}
+{% block extra_css %}
+<style>
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1px;
+  background: var(--bd);
+  border: 1px solid var(--bd);
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 18px;
+}
+.stat-cell {
+  background: var(--bg2);
+  padding: 1.25rem 1.5rem;
+  transition: background 0.15s;
+  border-top: 3px solid transparent;
+}
+.stat-cell:hover { background: var(--bg3); }
+.stat-cell-cours { border-top-color: rgba(212,168,67,0.6); }
+.stat-cell-lecon { border-top-color: rgba(255,255,255,0.15); }
+.stat-cell-exo   { border-top-color: rgba(212,168,67,0.4); }
+.stat-cell-etu   { border-top-color: rgba(0,200,100,0.5); }
+
+.stat-label {
+  font-family: 'Fira Code', monospace;
+  font-size: 10px;
+  color: var(--mu);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 4px;
+}
+.stat-number {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 2.2rem;
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  color: var(--wh);
+  line-height: 1.1;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.stat-gold { color: var(--gold); }
+.stat-desc {
+  font-size: 12px;
+  color: var(--mu);
+  margin-top: 6px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.stat-desc span { font-size: 13px; }
+@media (max-width: 600px) {
+  .stats-grid { grid-template-columns: repeat(2, 1fr); }
+}
+</style>
+{% endblock %}
+{% block content %}
+<div class="page-content">
+
+  <div class="dash-header">
+    <div>
+      <div class="greet-name">Espace Professeur</div>
+      <div class="greet-sub">Gère tes cours, leçons et exercices</div>
+    </div>
+    <a href="{% url 'professor_courses' %}" class="btn btn-primary btn-sm">Gérer les cours</a>
+  </div>
+
+  {% if specialite %}
+  <div style="margin-bottom:1rem;padding:0.5rem 1rem;background:rgba(212,168,67,0.08);border:1px solid rgba(212,168,67,0.2);border-radius:8px;display:inline-flex;align-items:center;gap:8px;font-size:13px">
+    <span style="color:var(--mu)">Votre spécialité :</span>
+    <span class="badge" style="background:rgba(212,168,67,0.15);color:var(--gold);border:1px solid rgba(212,168,67,0.25)">{{ specialite }}</span>
+  </div>
+  {% endif %}
+
+  <div class="stats-grid">
+    <div class="stat-cell stat-cell-cours">
+      <div class="stat-label">Cours</div>
+      <div class="stat-number stat-gold">{{ course_count }}</div>
+      <div class="stat-desc"><span>📚</span> publiés</div>
+    </div>
+    <div class="stat-cell stat-cell-lecon">
+      <div class="stat-label">Leçons</div>
+      <div class="stat-number">{{ total_lessons }}</div>
+      <div class="stat-desc"><span>📖</span> disponibles</div>
+    </div>
+    <div class="stat-cell stat-cell-exo">
+      <div class="stat-label">Exercices</div>
+      <div class="stat-number stat-gold">{{ exercise_count }}</div>
+      <div class="stat-desc"><span>💻</span> créés</div>
+    </div>
+    <div class="stat-cell stat-cell-etu">
+      <div class="stat-label">Étudiants</div>
+      <div class="stat-number">{{ student_count }}</div>
+      <div class="stat-desc"><span>👨‍🎓</span> inscrits</div>
+    </div>
+  </div>
+
+  <div class="grid-2" style="margin-bottom:12px">
+    <div class="card">
+      <div class="card-title">Mes cours</div>
+      {% for c in course_list %}
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--bd)">
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="font-size:1.3rem">{{ c.cours.emoji }}</span>
+          <div>
+            <div style="font-size:13px;font-weight:500;color:var(--wh)">{{ c.cours.titre }}</div>
+            <div style="font-size:10px;color:var(--mu);font-family:var(--fc)">{{ c.lesson_count }} leçons · {{ c.exo_count }} exercices · {{ c.student_count }} étudiants</div>
+          </div>
+        </div>
+        <a href="{% url 'professor_lessons' c.cours.slug %}" class="btn btn-ghost btn-sm">Gérer</a>
+      </div>
+      {% empty %}
+      <p style="color:var(--mu);font-size:13px">Aucun cours. <a href="{% url 'professor_course_create' %}" style="color:var(--gold)">Créer un cours</a></p>
+      {% endfor %}
+    </div>
+
+    <div class="card">
+      <div class="card-title">Tous les étudiants</div>
+      {% for s in student_list|slice:":10" %}
+      <div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--bd);font-size:12px">
+        <div class="avatar" style="width:28px;height:28px;font-size:10px">{{ s.username|upper|slice:":2" }}</div>
+        <div style="flex:1;min-width:0">
+          <div style="color:var(--wh);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ s.fullname }}</div>
+          <div style="display:flex;gap:4px;margin-top:2px">
+            {% for sc in s.courses|slice:":3" %}
+            <span class="badge badge-muted" style="font-size:8px">{{ sc.titre|truncatechars:12 }}</span>
+            {% empty %}
+            <span class="badge badge-muted" style="font-size:8px">Aucun cours</span>
+            {% endfor %}
+          </div>
+        </div>
+        <div style="text-align:right">
+          <div style="font-family:var(--fc);color:var(--gold);font-size:13px">{{ s.xp_formation }} XP</div>
+          <div style="font-size:9px;color:var(--mu)">{{ specialite|default:'XP' }}</div>
+        </div>
+      </div>
+      {% empty %}
+      <p style="color:var(--mu);font-size:13px">Aucun étudiant.</p>
+      {% endfor %}
+      {% if student_list|length > 10 %}
+      <a href="{% url 'professor_students' %}" class="btn btn-ghost btn-sm" style="margin-top:8px;width:100%;justify-content:center">Voir tous ({{ student_list|length }}) →</a>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="grid-2" style="margin-bottom:12px">
+    <div class="card">
+      <div class="card-title">Points des étudiants</div>
+      <div class="chart-wrap" style="height:220px"><canvas id="studentXpChart"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Répartition par cours</div>
+      <div class="chart-wrap" style="height:220px"><canvas id="coursePieChart"></canvas></div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const gold = '#D4A843', wh2 = '#E0E0E0', mu = '#666', bg4 = '#222', green = '#2ECC71', blue = '#3498DB';
+
+  const common = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { labels: { color: mu, font: { size: 10, family: "'Inter', sans-serif" }, boxWidth: 8, padding: 10 } }
+    }
+  };
+
+  const studentCtx = document.getElementById('studentXpChart');
+  if (studentCtx) {
+    new Chart(studentCtx, {
+      type: 'bar',
+      data: {
+        labels: [{% for s in student_list %}'{{ s.fullname|escapejs }}'{% if not forloop.last %},{% endif %}{% endfor %}],
+        datasets: [{
+          label: 'Points XP',
+          data: [{% for s in student_list %}{{ s.xp_formation }}{% if not forloop.last %},{% endif %}{% endfor %}],
+          backgroundColor: [{% for s in student_list %}{% if s.xp_formation >= 200 %}green{% elif s.xp_formation >= 80 %}gold{% else %}'#E74C3C'{% endif %}{% if not forloop.last %},{% endif %}{% endfor %}],
+          borderWidth: 0,
+          borderRadius: 3,
+          barThickness: 20,
+        }]
+      },
+      options: Object.assign({}, common, {
+        scales: {
+          y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: mu, font: { size: 9 } } },
+          x: { grid: { display: false }, ticks: { color: wh2, font: { size: 8 } } }
+        }
+      })
+    });
+  }
+
+  const courseCtx = document.getElementById('coursePieChart');
+  if (courseCtx) {
+    new Chart(courseCtx, {
+      type: 'doughnut',
+      data: {
+        labels: [{% for c in course_list %}'{{ c.cours.titre|escapejs }}'{% if not forloop.last %},{% endif %}{% endfor %}],
+        datasets: [{
+          data: [{% for c in course_list %}{{ c.student_count }}{% if not forloop.last %},{% endif %}{% endfor %}],
+          backgroundColor: ['#D4A843', '#3498DB', '#2ECC71', '#E74C3C', '#9B59B6', '#F39C12'],
+          borderWidth: 0,
+        }]
+      },
+      options: Object.assign({}, common, {
+        cutout: '60%',
+        plugins: {
+          legend: { position: 'bottom', labels: { color: mu, font: { size: 9, family: "'Inter', sans-serif" } } }
+        }
+      })
+    });
+  }
+});
+</script>
+{% endblock %}

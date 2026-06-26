@@ -1,0 +1,75 @@
+{% extends 'professor/base_professor.html' %}
+{% block title %}Exercices — {{ cours.titre }} — CodeMentor AI{% endblock %}
+{% block content %}
+<div class="page-content">
+
+  <a href="{% url 'professor_courses' %}" class="btn btn-ghost" style="margin-bottom:1rem">← Cours</a>
+
+  <div class="dash-header">
+    <div>
+      <div class="greet-name">{{ cours.emoji }} {{ cours.titre }}</div>
+      <div class="greet-sub">{{ count }} exercice(s)</div>
+    </div>
+    <a href="{% url 'professor_exercise_create' cours.slug %}" class="btn btn-primary btn-sm">+ Nouvel exercice</a>
+  </div>
+
+  <div class="table-wrap">
+    <table class="admin-table">
+      <thead>
+        <tr>
+          <th>Exercice</th>
+          <th>Leçon</th>
+          <th>Difficulté</th>
+          <th>Points</th>
+          <th>Tentatives</th>
+          <th>Réussis</th>
+          <th>Taux</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for exo in exercises %}
+        <tr>
+          <td style="font-size:13px;color:var(--wh)">{{ exo.exercice.titre }}</td>
+          <td>
+            {% if exo.exercice.lesson %}
+            <span style="font-size:11px;color:var(--gold)">{{ exo.exercice.lesson.titre }}</span>
+            {% elif exo.exercice.lesson_nom %}
+            <span style="font-size:11px;color:var(--mu)">{{ exo.exercice.lesson_nom }}</span>
+            {% else %}
+            <span style="font-size:11px;color:var(--mu)">—</span>
+            {% endif %}
+          </td>
+          <td>
+            <span class="diff {% if exo.exercice.difficulte == 'facile' %}diff-easy{% elif exo.exercice.difficulte == 'moyen' %}diff-medium{% else %}diff-hard{% endif %}">
+              {{ exo.exercice.difficulte|upper }}
+            </span>
+          </td>
+          <td><span style="font-family:var(--fc);color:var(--gold)">{{ exo.exercice.points }} XP</span></td>
+          <td>{{ exo.total_attempts }}</td>
+          <td>{{ exo.resolved }}</td>
+          <td>
+            {% if exo.total_attempts > 0 %}
+            <span class="badge {% widthratio exo.resolved exo.total_attempts 100 as pct %}{% if pct >= 70 %}badge-gold{% elif pct >= 40 %}badge-white{% else %}badge-muted{% endif %}">
+              {% widthratio exo.resolved exo.total_attempts 100 %}%
+            </span>
+            {% else %}
+            <span class="badge badge-muted">—</span>
+            {% endif %}
+          </td>
+          <td>
+            <div class="action-row">
+              <a href="{% url 'professor_exercise_edit' cours.slug exo.exercice.id %}" class="btn btn-ghost btn-sm">Modifier</a>
+              <a href="{% url 'professor_exercise_delete' cours.slug exo.exercice.id %}" class="btn btn-sm btn-delete" onclick="return confirm('Supprimer {{ exo.exercice.titre }} ?')">Supprimer</a>
+            </div>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="8" style="text-align:center;color:var(--mu);padding:2rem">Aucun exercice. <a href="{% url 'professor_exercise_create' cours.slug %}" style="color:var(--gold)">Créer un exercice</a></td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+</div>
+{% endblock %}

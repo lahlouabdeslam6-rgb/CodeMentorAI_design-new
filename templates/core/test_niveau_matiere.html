@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% block title %}Test {{ formation.nom }} — CodeMentor AI{% endblock %}
+{% block content %}
+<div class="page-content">
+
+  <div class="card" style="max-width:640px;margin:2rem auto">
+    <div style="text-align:center;margin-bottom:1.5rem">
+      <div style="font-size:3rem;margin-bottom:0.5rem">{{ formation.emoji }}</div>
+      <h2 style="margin-bottom:0.25rem">Test de niveau {{ formation.nom }}</h2>
+      <p style="color:var(--wh2);font-size:14px">
+        Réponds à ces questions pour déterminer ton niveau.
+      </p>
+    </div>
+
+    <form method="post" id="testForm">
+      {% csrf_token %}
+      {% for q in questions %}
+      <div class="card" style="margin-bottom:10px;padding:1rem;border:1px solid var(--bd)">
+        <div style="font-size:14px;font-weight:500;color:var(--wh);margin-bottom:8px">
+          {{ forloop.counter }}. {{ q.question }}
+        </div>
+        {% for opt in q.options %}
+        <label style="display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:4px;cursor:pointer;font-size:13px;color:var(--wh2);transition:background 0.15s" onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background='transparent'">
+          <input type="radio" name="q{{ forloop.parentloop.counter0 }}" value="{{ forloop.counter0 }}" style="accent-color:var(--gold)" required>
+          <span>{{ opt }}</span>
+        </label>
+        {% endfor %}
+      </div>
+      {% endfor %}
+
+      <button type="submit" class="btn btn-gold" style="width:100%;justify-content:center;padding:12px;font-size:15px">
+        ✅ Valider le test
+      </button>
+    </form>
+  </div>
+
+</div>
+{% endblock %}

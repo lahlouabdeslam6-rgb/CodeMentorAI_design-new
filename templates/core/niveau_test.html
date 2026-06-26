@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+{% block title %}Test de niveau — CodeMentor AI{% endblock %}
+{% block content %}
+<div class="diag-wrapper">
+
+  <div class="diag-header">
+    <div class="diag-step">QUESTION {{ question_num }} / {{ total_questions }}</div>
+    <h1>Test de niveau</h1>
+    <p style="color:var(--mu);font-size:13px;margin-bottom:1rem">
+      Réponds à ces questions pour que nous puissions déterminer ton niveau et adapter ton parcours.
+    </p>
+    <div class="prog-track" style="height:3px;margin-bottom:1rem">
+      <div class="prog-fill prog-fill-gold" style="width:{{ progression_pct }}%"></div>
+    </div>
+  </div>
+
+  <div class="question-card">
+    <div class="question-text">{{ question.question }}</div>
+
+    <form method="post">
+      {% csrf_token %}
+      <div class="options-list">
+        {% for option in question.options %}
+        <label class="option-label">
+          <input type="radio" name="reponse" value="{{ forloop.counter0 }}" required>
+          {{ option }}
+        </label>
+        {% endfor %}
+      </div>
+      <button type="submit" class="btn btn-primary" style="margin-top:1.25rem">
+        {% if question_num == total_questions %}Terminer le test{% else %}Question suivante →{% endif %}
+      </button>
+    </form>
+  </div>
+
+</div>
+{% endblock %}

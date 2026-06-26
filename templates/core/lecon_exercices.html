@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+{% block title %}Exercices — {{ lesson.titre }} — CodeMentor AI{% endblock %}
+{% block extra_css %}
+<style>
+.exo-grid { display:flex; flex-direction:column; gap:10px; }
+.exo-card { display:flex; align-items:center; gap:14px; padding:14px 18px; background:var(--bg4); border:1px solid var(--bg3); border-radius:8px; transition:all 0.2s; }
+.exo-card:hover { border-color:var(--gold); background:rgba(212,168,67,0.06); }
+.exo-card.resolu { border-color:rgba(46,204,113,0.3); background:rgba(46,204,113,0.04); }
+.exo-status { width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:13px; flex-shrink:0; }
+.exo-status.pending { background:var(--bg3); color:var(--mu); }
+.exo-status.done { background:rgba(46,204,113,0.15); color:#2ECC71; }
+.exo-info { flex:1; min-width:0; }
+.exo-titre { font-size:14px; font-weight:500; color:var(--wh); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.exo-meta { font-size:11px; color:var(--mu); margin-top:2px; }
+.badge-difficulte { display:inline-block; padding:1px 8px; border-radius:10px; font-size:10px; font-weight:500; font-family:var(--fc); }
+.badge-facile { background:rgba(46,204,113,0.12); color:#2ECC71; }
+.badge-moyen { background:rgba(212,168,67,0.12); color:var(--gold); }
+.badge-difficile { background:rgba(231,76,60,0.12); color:#E74C3C; }
+.empty-exo { text-align:center; padding:2.5rem; color:var(--mu); font-size:14px; }
+</style>
+{% endblock %}
+{% block content %}
+<div class="page-content">
+
+<a href="{% url 'lecon_detail' slug=formation.slug %}?module={{ cours.slug }}&lecon={{ lesson.ordre }}" class="btn btn-ghost" style="margin-bottom:1rem">← Retour à la leçon</a>
+
+<div class="card" style="max-width:700px;margin:0 auto">
+
+  <div style="margin-bottom:1.5rem">
+    <span style="font-size:11px;color:var(--mu);font-family:var(--fc);text-transform:uppercase;letter-spacing:0.04em">{{ cours.titre }}</span>
+    <h1 style="margin:0.25rem 0 0;font-size:1.35rem;color:var(--white)">📝 Exercices — {{ lesson.titre }}</h1>
+    {% if all_completed %}
+    <div style="margin-top:12px;padding:12px 16px;background:rgba(46,204,113,0.08);border:1px solid rgba(46,204,113,0.2);border-radius:8px">
+      <div style="font-size:14px;font-weight:600;color:#2ECC71">✅ Tous les exercices sont réussis !</div>
+      <div style="font-size:12px;color:var(--wh2);margin-top:4px">Félicitations, tu maîtrises cette leçon.</div>
+    </div>
+    {% else %}
+    <div style="font-size:13px;color:var(--wh2);margin-top:8px">{{ remaining }} exercice(s) restant(s)</div>
+    {% endif %}
+  </div>
+
+  <div class="exo-grid">
+    {% for e in exercises %}
+    <a href="{% url 'exercice_detail' e.id %}" class="exo-card{% if e.resolu %} resolu{% endif %}">
+      <div class="exo-status {% if e.resolu %}done{% else %}pending{% endif %}">
+        {% if e.resolu %}✓{% else %}{{ forloop.counter }}{% endif %}
+      </div>
+      <div class="exo-info">
+        <div class="exo-titre">{{ e.titre }}</div>
+        <div class="exo-meta">
+          <span class="badge-difficulte badge-{{ e.difficulte }}">{{ e.get_difficulte_label }}</span>
+          <span style="margin-left:8px">+{{ e.points }} XP</span>
+        </div>
+      </div>
+      <div style="font-size:12px;color:var(--gold)">
+        {% if e.resolu %}✅{% else %}→{% endif %}
+      </div>
+    </a>
+    {% empty %}
+    <div class="empty-exo">📌 Aucun exercice n'est disponible pour cette leçon.</div>
+    {% endfor %}
+  </div>
+
+  <div style="margin-top:1.5rem;padding-top:1rem;border-top:1px solid var(--bg3);display:flex;justify-content:space-between;gap:10px">
+    <a href="{% url 'lecon_detail' slug=formation.slug %}?module={{ cours.slug }}&lecon={{ lesson.ordre }}" class="btn btn-ghost">← Retour à la leçon</a>
+    {% if all_completed %}
+      {% if next_lesson %}
+    <a href="{% url 'lecon_detail' slug=formation.slug %}?module={{ cours.slug }}&lecon={{ next_lesson.ordre }}" class="btn btn-gold">➡ Passer à la leçon suivante</a>
+      {% else %}
+    <a href="{% url 'lecon_detail' slug=formation.slug %}?module={{ cours.slug }}&lecon={{ lesson.ordre }}&termine=1" class="btn btn-ghost">Terminer le cours ✓</a>
+      {% endif %}
+    {% endif %}
+  </div>
+
+</div>
+
+</div>
+{% endblock %}

@@ -1,72 +1,44 @@
 {% extends 'base.html' %}
-{% block title %}Cours JavaScript — CodeMentor AI{% endblock %}
-
+{% block title %}Formations — CodeMentor AI{% endblock %}
 {% block content %}
 <div class="page-content">
 
   <div class="section-head">
-    <h2>Cours JavaScript</h2>
-    <span class="section-count">{{ cours_termines }} / {{ total_cours }} complétés</span>
+    <h2>Formations</h2>
+    <span class="section-count">{{ total_formations }} technologies</span>
   </div>
 
-  <!-- Filtres -->
-  <div class="filter-row">
-    <a href="?niveau=" class="filter-btn {% if not niveau_actif %}active{% endif %}">TOUS</a>
-    <a href="?niveau=debutant" class="filter-btn {% if niveau_actif == 'debutant' %}active{% endif %}">DÉBUTANT</a>
-    <a href="?niveau=intermediaire" class="filter-btn {% if niveau_actif == 'intermediaire' %}active{% endif %}">INTERMÉDIAIRE</a>
-    <a href="?niveau=avance" class="filter-btn {% if niveau_actif == 'avance' %}active{% endif %}">AVANCÉ</a>
-  </div>
-
-  <!-- Grille de cours -->
   <div class="grid-auto" style="margin-bottom:2rem">
-    {% for cours in cours_list %}
-    <a href="{% url 'cours_detail' cours.slug %}" class="course-card">
-      <div class="course-thumb">
-        <span>{{ cours.emoji|default:"📘" }}</span>
-        <span class="badge {% if cours.niveau == 'debutant' %}badge-white{% elif cours.niveau == 'intermediaire' %}badge-gold{% else %}badge-muted{% endif %}"
-              style="position:absolute;top:7px;right:7px">
-          {{ cours.get_niveau_display|upper }}
-        </span>
-      </div>
-      <div class="course-body">
-        <h4>{{ cours.titre }}</h4>
-        <p>{{ cours.description|truncatechars:55 }}</p>
-        <div class="mini-prog">
-          <div class="mini-fill" style="width:{{ cours.progression_pct }}%;background:{% if cours.progression_pct == 100 %}var(--wh){% elif cours.progression_pct > 0 %}var(--gold){% else %}var(--bg4){% endif %}"></div>
+    {% for f in formations %}
+    <div class="course-card" style="text-decoration:none;color:inherit">
+      <a href="{% url 'cours_detail' slug=f.formation.slug %}" style="text-decoration:none;color:inherit">
+        <div class="course-thumb">
+          <span style="font-size:2.5rem">{{ f.formation.emoji }}</span>
         </div>
-        <div class="mini-label">{{ cours.progression_pct }}% complété</div>
+        <div class="course-body">
+          <h4>{{ f.formation.nom }}</h4>
+          <p style="font-size:12px;color:var(--wh2);margin-bottom:8px">{{ f.formation.description|truncatechars:100 }}</p>
+          {% if f.total_cours > 0 %}
+          <div style="display:flex;gap:12px;font-size:11px;color:var(--mu);margin-bottom:10px">
+            <span>📖 {{ f.total_cours }} modules</span>
+            <span>📝 {{ f.total_lessons }} leçons</span>
+            <span>📝 {{ f.total_exos }} exos</span>
+          </div>
+      {% else %}
+          <p style="color:var(--mu);font-size:12px;margin:0.5rem 0">Aucun cours disponible pour le moment.</p>
+      {% endif %}
+        </div>
+      </a>
+      <div style="display:flex;gap:8px;padding:0 1rem 1rem">
+        {% if f.test_ok %}
+        <a href="{% url 'cours_detail' slug=f.formation.slug %}" class="btn btn-gold btn-sm" style="padding:4px 16px;font-size:11px;flex:1;text-align:center">Voir le parcours →</a>
+        {% else %}
+        <a href="{% url 'test_niveau_matiere' f.formation.slug %}" class="btn btn-sm" style="padding:4px 16px;font-size:11px;flex:1;text-align:center;background:var(--bg3);color:var(--gold);border:1px solid var(--bd)">🔒 Test requis</a>
+        {% endif %}
       </div>
-    </a>
+    </div>
     {% empty %}
-    <p style="color:var(--mu);font-size:13px;grid-column:1/-1">Aucun cours disponible pour ce niveau.</p>
-    {% endfor %}
-  </div>
-
-  <!-- Exercices -->
-  <div class="section-head">
-    <h2>Exercices</h2>
-    <span class="section-count">{{ exo_reussis }} / {{ total_exo }} réussis</span>
-  </div>
-
-  <div class="exo-list">
-    {% for exo in exercices %}
-    <a href="{% url 'exercice_detail' exo.id %}" class="exo-item">
-      <div class="exo-ico">
-        {% if exo.resolu %}✅{% elif exo.difficulte == 'facile' %}🟢{% elif exo.difficulte == 'moyen' %}🟡{% else %}🔴{% endif %}
-      </div>
-      <div class="exo-info">
-        <h4>
-          {{ exo.titre }}
-          <span class="diff {% if exo.difficulte == 'facile' %}diff-easy{% elif exo.difficulte == 'moyen' %}diff-medium{% else %}diff-hard{% endif %}">
-            {{ exo.get_difficulte_display|upper }}
-          </span>
-        </h4>
-        <p>{{ exo.categorie }} · {% if exo.resolu %}Résolu{% else %}À faire{% endif %}</p>
-      </div>
-      <div class="exo-xp">+{{ exo.points }} XP</div>
-    </a>
-    {% empty %}
-    <p style="color:var(--mu);font-size:13px">Aucun exercice disponible.</p>
+    <p style="color:var(--mu);font-size:13px;grid-column:1/-1">Aucune formation disponible.</p>
     {% endfor %}
   </div>
 

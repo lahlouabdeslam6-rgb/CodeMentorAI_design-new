@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+{% block title %}Modifier mon profil — CodeMentor AI{% endblock %}
+{% block nav %}
+{% if profil.role == 'professor' %}
+  {% include 'professor/_nav.html' %}
+{% elif profil.role == 'admin' %}
+  {% include 'admin/_nav.html' %}
+{% else %}
+  {{ block.super }}
+{% endif %}
+{% endblock %}
+{% block content %}
+<div class="page-content">
+
+  <div style="max-width:480px;margin:0 auto">
+
+    <div class="section-head">
+      <h2>👤 Mon profil</h2>
+    </div>
+
+    <div class="card" style="padding:1.25rem">
+      <div style="display:flex;flex-direction:column;gap:0.75rem;margin-bottom:1.25rem">
+        <div class="detail-row"><span>Nom d'utilisateur</span><span>{{ user.username }}</span></div>
+        <div class="detail-row"><span>Rôle</span><span>{% if profil.role == 'student' %}Étudiant{% else %}Professeur{% endif %}</span></div>
+        <div class="detail-row"><span>XP Total</span><span>{{ total_xp }} XP</span></div>
+        <div class="detail-row"><span>Niveau</span><span>{{ profil.get_niveau_label }}</span></div>
+      </div>
+
+      {% if profil.role == 'student' %}
+      <div style="font-size:12px;color:var(--mu);margin-top:1rem">
+        <strong style="color:var(--wh)">XP par matière</strong>
+        {% for fp in formations_progress %}
+        <div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--bd)">
+          <span>{{ fp.formation_nom }}</span>
+          <span style="color:var(--gold)">{{ fp.xp }} XP</span>
+        </div>
+        {% empty %}
+        <div style="margin-top:4px">Aucune activité</div>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      <form method="post">
+        {% csrf_token %}
+        <div class="form-group">
+          <label class="form-label">Adresse email</label>
+          <input type="email" name="email" class="form-control" value="{{ profil.email|default:user.email }}" required>
+        </div>
+        <button type="submit" class="btn btn-gold" style="width:100%;justify-content:center">Enregistrer</button>
+      </form>
+    </div>
+
+    <div style="text-align:center;margin-top:1rem">
+      <a href="{% url 'dashboard' %}" class="btn btn-ghost btn-sm">← Retour au Dashboard</a>
+    </div>
+
+  </div>
+
+</div>
+{% endblock %}

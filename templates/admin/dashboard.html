@@ -1,0 +1,241 @@
+{% extends 'admin/base_admin.html' %}
+{% block title %}Admin Dashboard — CodeMentor AI{% endblock %}
+{% block extra_css %}
+<style>
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 1px;
+  background: var(--bd);
+  border: 1px solid var(--bd);
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 18px;
+}
+.stat-cell {
+  background: var(--bg2);
+  padding: 1.25rem 1.5rem;
+  transition: background 0.15s;
+  border-top: 3px solid transparent;
+}
+.stat-cell:hover { background: var(--bg3); }
+.stat-cell-etu  { border-top-color: rgba(255,255,255,0.15); }
+.stat-cell-prof { border-top-color: rgba(255,255,255,0.10); }
+.stat-cell-cours{ border-top-color: rgba(212,168,67,0.6); }
+.stat-cell-exo  { border-top-color: rgba(212,168,67,0.4); }
+.stat-cell-actif{ border-top-color: rgba(0,200,100,0.5); }
+
+.stat-label {
+  font-family: 'Fira Code', monospace;
+  font-size: 10px;
+  color: var(--mu);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 4px;
+}
+.stat-number {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 2.2rem;
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  color: var(--wh);
+  line-height: 1.1;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.stat-gold { color: var(--gold); }
+.stat-desc {
+  font-size: 12px;
+  color: var(--mu);
+  margin-top: 6px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.stat-desc span { font-size: 13px; }
+
+.live-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(0,200,100,0.9);
+  animation: pulse-dot 1.8s infinite;
+  vertical-align: middle;
+}
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(0.75); }
+}
+@media (max-width: 600px) {
+  .stats-grid { grid-template-columns: repeat(2, 1fr); }
+}
+</style>
+{% endblock %}
+{% block content %}
+<div class="page-content">
+
+  <div class="dash-header">
+    <div>
+      <div class="greet-name">Administration</div>
+      <div class="greet-sub">Gestion complète de la plateforme</div>
+    </div>
+    <div style="display:flex;gap:8px">
+      <a href="{% url 'admin_students' %}" class="btn btn-primary btn-sm">Accepter les demandes</a>
+      <a href="{% url 'admin_professors' %}" class="btn btn-ghost btn-sm">Gérer les professeurs</a>
+    </div>
+  </div>
+
+  <div class="stats-grid">
+    <div class="stat-cell stat-cell-etu">
+      <div class="stat-label">Étudiants</div>
+      <div class="stat-number">{{ total_etudiants }}</div>
+      <div class=stat-desc><span>👨‍🎓</span> inscrits</div>
+    </div>
+    <div class="stat-cell stat-cell-prof">
+      <div class="stat-label">Professeurs</div>
+      <div class="stat-number">{{ total_professeurs }}</div>
+      <div class=stat-desc><span>👨‍🏫</span> en activité</div>
+    </div>
+    <div class="stat-cell stat-cell-cours">
+      <div class="stat-label">Cours</div>
+      <div class="stat-number stat-gold">{{ total_cours }}</div>
+      <div class=stat-desc><span>📚</span> publiés</div>
+    </div>
+    <div class="stat-cell stat-cell-exo">
+      <div class="stat-label">Exercices</div>
+      <div class="stat-number stat-gold">{{ total_exercices }}</div>
+      <div class=stat-desc><span>💻</span> disponibles</div>
+    </div>
+    <div class="stat-cell" style="border-top-color:rgba(212,168,67,0.3)">
+      <div class="stat-label">Formations</div>
+      <div class="stat-number stat-gold">{{ total_formations }}</div>
+      <div class=stat-desc><span>📚</span> au catalogue</div>
+    </div>
+    <div class="stat-cell stat-cell-actif">
+      <div class="stat-label">Actifs</div>
+      <div class="stat-number">{% if utilisateurs_actifs > 0 %}<span class="live-dot"></span>{% endif %}{{ utilisateurs_actifs }}</div>
+      <div class=stat-desc><span>✅</span> aujourd'hui</div>
+    </div>
+  </div>
+
+  <div class="grid-2" style="margin-bottom:12px">
+    <div class="card">
+      <div class="card-title">Distribution des comptes</div>
+      <div class="chart-wrap" style="height:240px"><canvas id="accountPieChart"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Inscriptions (7 derniers jours)</div>
+      <div class="chart-wrap" style="height:240px"><canvas id="registrationsChart"></canvas></div>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">Statut des étudiants</div>
+      <div class="chart-wrap" style="height:220px"><canvas id="statusBarChart"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Inscriptions récentes</div>
+      <div style="display:flex;flex-direction:column;gap:6px">
+        {% for r in recent_registrations %}
+        <div style="display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid var(--bd);font-size:12px">
+          <div class="avatar" style="width:28px;height:28px;font-size:10px">{{ r.username|upper|slice:":2" }}</div>
+          <span style="flex:1;color:var(--wh2)">{{ r.fullname|default:r.username }}</span>
+          <span class="badge {% if r.status == 'approved' %}badge-gold{% elif r.status == 'pending' %}badge-white{% else %}badge-muted{% endif %}">{{ r.status }}</span>
+          <span style="font-size:10px;color:var(--mu);font-family:var(--fc)">{{ r.cree_le|timesince }}</span>
+        </div>
+        {% empty %}
+        <p style="color:var(--mu);font-size:13px">Aucune inscription récente</p>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const gold = '#D4A843', green = '#2ECC71', red = '#E74C3C', orange = '#F39C12', blue = '#3498DB';
+  const bg4 = '#222', wh2 = '#E0E0E0', mu = '#666';
+
+  const common = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { labels: { color: mu, font: { size: 10, family: "'Inter', sans-serif" }, boxWidth: 8, padding: 10 } }
+    }
+  };
+
+  const pieCtx = document.getElementById('accountPieChart');
+  if (pieCtx) {
+    new Chart(pieCtx, {
+      type: 'pie',
+      data: {
+        labels: ['Étudiants', 'Professeurs'],
+        datasets: [{
+          data: [{{ total_etudiants }}, {{ total_professeurs }}],
+          backgroundColor: [gold, blue],
+          borderWidth: 0,
+        }]
+      },
+      options: common
+    });
+  }
+
+  const regCtx = document.getElementById('registrationsChart');
+  if (regCtx) {
+    new Chart(regCtx, {
+      type: 'line',
+      data: {
+        labels: {{ weeks_labels|safe }},
+        datasets: [{
+          label: 'Nouvelles inscriptions',
+          data: {{ registrations_over_time|safe }},
+          borderColor: gold,
+          backgroundColor: gold + '33',
+          fill: true,
+          tension: 0.35,
+          pointRadius: 3,
+          pointBackgroundColor: gold,
+          borderWidth: 2,
+        }]
+      },
+      options: Object.assign({}, common, {
+        scales: {
+          y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: mu, font: { size: 9 } } },
+          x: { grid: { display: false }, ticks: { color: mu, font: { size: 9 } } }
+        }
+      })
+    });
+  }
+
+  const barCtx = document.getElementById('statusBarChart');
+  if (barCtx) {
+    new Chart(barCtx, {
+      type: 'bar',
+      data: {
+        labels: ['Approuvés', 'En attente', 'Rejetés'],
+        datasets: [{
+          label: 'Étudiants',
+          data: [{{ students_approved }}, {{ students_pending }}, {{ students_rejected }}],
+          backgroundColor: [green, orange, red],
+          borderWidth: 0,
+          borderRadius: 3,
+          barThickness: 40,
+        }]
+      },
+      options: Object.assign({}, common, {
+        scales: {
+          y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: mu, font: { size: 9 } } },
+          x: { grid: { display: false }, ticks: { color: wh2, font: { size: 10 } } }
+        }
+      })
+    });
+  }
+});
+</script>
+{% endblock %}

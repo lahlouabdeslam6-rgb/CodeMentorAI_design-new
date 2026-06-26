@@ -1,0 +1,13 @@
+<nav class="nav">
+  <a href="{% url 'professor_dashboard' %}" class="logo" style="text-decoration:none">
+    <div class="logo-sq"><span>CM</span></div>
+    <span style="color:var(--gold);font-size:10px;font-family:var(--fc);letter-spacing:0.05em">PROF</span>
+  </a>
+  <div class="nav-links">
+    <a href="{% url 'professor_dashboard' %}" class="nav-link {% if request.resolver_match.url_name == 'professor_dashboard' %}active{% endif %}">Dashboard</a>
+    <a href="{% url 'professor_courses' %}" class="nav-link {% if 'professor_course' in request.resolver_match.url_name or 'professor_lesson' in request.resolver_match.url_name or 'professor_exercise' in request.resolver_match.url_name %}active{% endif %}">Cours</a>
+    <a href="{% url 'professor_students' %}" class="nav-link {% if request.resolver_match.url_name == 'professor_students' %}active{% endif %}">Étudiants</a>
+    <a href="{% url 'contact_admin' %}" class="nav-link {% if request.resolver_match.url_name == 'contact_admin' %}active{% endif %}">Contact</a>
+    <a href="{% url 'logout' %}" class="nav-link">Déconnexion</a>
+  </div>
+</nav>

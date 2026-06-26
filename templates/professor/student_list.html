@@ -1,0 +1,62 @@
+{% extends 'professor/base_professor.html' %}
+{% block title %}Étudiants — CodeMentor AI{% endblock %}
+{% block content %}
+<div class="page-content">
+
+  <div class="dash-header">
+    <div>
+      <div class="greet-name">Tous les étudiants</div>
+      <div class="greet-sub">{{ total }} étudiant(s) dans l'application</div>
+    </div>
+  </div>
+
+  <form method="get" style="margin-bottom:1rem">
+    <div style="display:flex;gap:8px">
+      <input type="text" name="search" class="form-control" placeholder="Rechercher un étudiant…" value="{{ search }}" style="max-width:300px">
+      <button type="submit" class="btn btn-ghost btn-sm">Rechercher</button>
+    </div>
+  </form>
+
+  <div class="table-wrap">
+    <table class="admin-table">
+      <thead>
+        <tr>
+          <th>Étudiant</th>
+          <th>Niveau</th>
+          <th>XP ({{ students.0.formation_nom|default:'Matière' }})</th>
+          <th>Cours suivis</th>
+          <th>Statut</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for s in students %}
+        <tr>
+          <td>
+            <div style="display:flex;align-items:center;gap:8px">
+              <div class="avatar" style="width:30px;height:30px;font-size:11px">{{ s.username|upper|slice:":2" }}</div>
+              <div>
+                <div style="font-size:13px;font-weight:500;color:var(--wh)">{{ s.fullname }}</div>
+                <div style="font-size:10px;color:var(--mu);font-family:var(--fc)">@{{ s.username }}</div>
+              </div>
+            </div>
+          </td>
+          <td><span class="badge {% if s.niveau == 'debutant' %}badge-white{% elif s.niveau == 'intermediaire' %}badge-gold{% elif s.niveau == 'avance' %}badge-red{% endif %}">{{ s.niveau_display }}</span></td>
+          <td><span style="font-family:var(--fc);color:var(--gold)">{{ s.xp_formation }} XP</span></td>
+          <td><span class="badge badge-gold">{{ s.course_count }}</span></td>
+          <td>
+            {% if s.is_active %}
+            <span class="status-badge status-approved">Actif</span>
+            {% else %}
+            <span class="status-badge status-rejected">Inactif</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="5" style="text-align:center;color:var(--mu);padding:2rem">Aucun étudiant trouvé.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,71 @@
+{% extends 'professor/base_professor.html' %}
+{% block title %}Tous les cours — CodeMentor AI{% endblock %}
+{% block content %}
+<div class="page-content">
+
+  <div class="dash-header">
+    <div>
+      <div class="greet-name">Tous les cours</div>
+      <div class="greet-sub">{{ total }} cours dans l'application</div>
+    </div>
+    <a href="{% url 'professor_course_create' %}" class="btn btn-primary btn-sm">+ Nouveau cours</a>
+  </div>
+
+  {% if specialite %}
+  <div style="margin-bottom:1rem;padding:0.5rem 1rem;background:rgba(212,168,67,0.08);border:1px solid rgba(212,168,67,0.2);border-radius:8px;display:inline-flex;align-items:center;gap:8px;font-size:13px">
+    <span style="color:var(--mu)">Votre spécialité :</span>
+    <span class="badge" style="background:rgba(212,168,67,0.15);color:var(--gold);border:1px solid rgba(212,168,67,0.25)">{{ specialite }}</span>
+    <span style="color:var(--mu);font-size:11px">— Seuls les cours de cette matière sont affichés.</span>
+  </div>
+  {% endif %}
+
+  <div class="table-wrap">
+    <table class="admin-table">
+      <thead>
+        <tr>
+          <th>Cours</th>
+          <th>Niveau</th>
+          <th>Professeur</th>
+          <th>Leçons</th>
+          <th>Exercices</th>
+          <th>Étudiants</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for c in courses %}
+        <tr>
+          <td>
+            <div style="display:flex;align-items:center;gap:8px">
+              <span style="font-size:1.5rem">{{ c.cours.emoji }}</span>
+              <div>
+                <div style="font-size:13px;font-weight:500;color:var(--wh)">{{ c.cours.titre }}</div>
+                <div style="font-size:10px;color:var(--mu);font-family:var(--fc)">{{ c.cours.category }}</div>
+              </div>
+            </div>
+          </td>
+          <td><span class="badge {% if c.cours.niveau == 'debutant' %}badge-white{% elif c.cours.niveau == 'intermediaire' %}badge-gold{% else %}badge-red{% endif %}">{{ c.cours.get_niveau_label }}</span></td>
+          <td><span style="font-size:12px;color:var(--gold)">{{ c.professor_name }}</span></td>
+          <td>{{ c.lesson_count }}</td>
+          <td>{{ c.exo_count }}</td>
+          <td>{{ c.student_count }}</td>
+          <td>
+            <div class="action-row">
+              <a href="{% url 'professor_lessons' c.cours.slug %}" class="btn btn-ghost btn-sm">Leçons</a>
+              <a href="{% url 'professor_exercises' c.cours.slug %}" class="btn btn-ghost btn-sm">Exercices</a>
+              {% if c.is_owner %}
+              <a href="{% url 'professor_course_edit' c.cours.slug %}" class="btn btn-ghost btn-sm">Modifier</a>
+              <a href="{% url 'professor_course_delete' c.cours.slug %}" class="btn btn-sm btn-delete" onclick="return confirm('Supprimer {{ c.cours.titre }} ?')">Supprimer</a>
+              {% endif %}
+            </div>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="7" style="text-align:center;color:var(--mu);padding:2rem">Aucun cours. <a href="{% url 'professor_course_create' %}" style="color:var(--gold)">Créer un cours</a></td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+</div>
+{% endblock %}

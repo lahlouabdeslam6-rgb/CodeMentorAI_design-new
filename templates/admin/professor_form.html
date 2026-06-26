@@ -1,0 +1,67 @@
+{% extends 'admin/base_admin.html' %}
+{% block title %}{% if edit %}Modifier{% else %}Créer{% endif %} un professeur — CodeMentor AI{% endblock %}
+{% block content %}
+<div class="page-content">
+
+  <a href="{% url 'admin_professors' %}" class="btn btn-ghost" style="margin-bottom:1rem">← Retour</a>
+
+  <div class="card" style="max-width:480px">
+    <div class="card-title">{% if edit %}Modifier le professeur{% else %}Nouveau professeur{% endif %}</div>
+
+    <form method="post">
+      {% csrf_token %}
+      {% if not edit %}
+      <div class="form-group">
+        <label class="form-label">Nom d'utilisateur</label>
+        <input type="text" name="username" class="form-control" value="" required>
+      </div>
+      {% endif %}
+      <div class="form-group">
+        <label class="form-label">Adresse email</label>
+        <input type="email" name="email" class="form-control" value="{% if edit %}{{ user.email }}{% endif %}" required>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Mot de passe{% if edit %} (laisser vide pour ne pas changer){% endif %}</label>
+        <input type="password" name="password" class="form-control" placeholder="••••••••" {% if not edit %}required{% endif %}>
+      </div>
+      <div class="form-group" id="specialiteGroup">
+        <label class="form-label">Matière enseignée <span style="color:var(--gold)">*</span></label>
+        <select name="specialite" class="form-control" id="specialiteSelect" required>
+          <option value="">— Choisir une matière —</option>
+          {% for s in specialites %}
+          <option value="{{ s }}" {% if edit and profil.specialite == s %}selected{% endif %}>{{ s }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="form-group" id="nouvelleMatiereGroup" style="display:none">
+        <label class="form-label">Nouvelle matière</label>
+        <input type="text" name="nouvelle_matiere" id="nouvelleMatiereInput" class="form-control" placeholder="Exemple : C++, C#, Go, Rust, Flutter…">
+      </div>
+      <script>
+      (function() {
+        var sel = document.getElementById('specialiteSelect');
+        var grp = document.getElementById('nouvelleMatiereGroup');
+        var inp = document.getElementById('nouvelleMatiereInput');
+        function toggle() {
+          if (sel.value === 'Autre') {
+            grp.style.display = 'block';
+            grp.style.animation = 'fadeIn 0.2s ease';
+            inp.required = true;
+          } else {
+            grp.style.display = 'none';
+            inp.required = false;
+            inp.value = '';
+          }
+        }
+        sel.addEventListener('change', toggle);
+        toggle();
+      })();
+      </script>
+      <button type="submit" class="btn btn-primary">
+        {% if edit %}Enregistrer les modifications{% else %}Créer le professeur{% endif %}
+      </button>
+    </form>
+  </div>
+
+</div>
+{% endblock %}

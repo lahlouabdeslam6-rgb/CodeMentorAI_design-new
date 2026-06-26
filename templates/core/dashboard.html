@@ -1,26 +1,48 @@
 {% extends 'base.html' %}
+{% load static %}
 {% block title %}Dashboard — CodeMentor AI{% endblock %}
 
 {% block content %}
 <div class="page-content">
 
+  <!-- ═══ EXISTING HEADER ═══ -->
   <div class="dash-header">
     <div class="user-row">
       <div class="avatar">{{ user.username|upper|slice:":2" }}</div>
       <div>
         <div class="greet-name">Bienvenue, {{ user.username }} 👋</div>
-        <div class="greet-sub">Niveau {{ profil.niveau }} · {{ profil.get_niveau_display }} · {{ profil.points }} XP</div>
+        <div class="greet-sub">{{ profil.email }}</div>
       </div>
     </div>
     <a href="{% url 'cours_list' %}" class="btn btn-primary">Continuer l'apprentissage →</a>
   </div>
 
-  <!-- Métriques -->
-  <div class="metrics-block">
-    <div class="metric">
-      <div class="metric-val gold">{{ profil.points }}</div>
-      <div class="metric-lab">Points XP</div>
+  <!-- ═══ PER-FORMATION XP ═══ -->
+  <div class="card" style="margin-bottom:12px;padding:1.25rem">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+      <span style="font-size:1.3rem">🏆</span>
+      <span style="font-size:15px;font-weight:600;color:var(--wh)">Mes XP par matière</span>
     </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px">
+      {% for fp in formations_progress %}
+      <div style="display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:6px;background:var(--bg3);border:1px solid var(--bd)">
+        <span style="font-size:1.2rem">{{ fp.formation.emoji }}</span>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:12px;color:var(--wh2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ fp.formation.nom }}</div>
+          <div style="font-size:14px;font-weight:700;color:var(--gold)">{{ fp.xp }} XP</div>
+          <div style="font-size:10px;color:var(--mu)">{{ fp.completed_exercises }} exos · {% if fp.exam_passed %}✅ Examen{% else %}📋 En cours{% endif %}</div>
+        </div>
+      </div>
+      {% empty %}
+      <div style="font-size:13px;color:var(--mu);grid-column:1/-1;text-align:center;padding:8px">
+        Aucune activite pour le moment.
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- ═══ METRICS ═══ -->
+  <div class="metrics-block">
     <div class="metric">
       <div class="metric-val">{{ cours_termines }}</div>
       <div class="metric-lab">Cours terminés</div>
@@ -35,27 +57,81 @@
     </div>
   </div>
 
-  <!-- Progression -->
-  <div class="card" style="margin-bottom:12px">
-    <div class="card-title">Progression par module</div>
-    {% for prog in progression %}
-    <div class="prog-wrap">
-      <div class="prog-label">
-        <span>{{ prog.cours.titre }}</span>
-        <span class="prog-pct" style="color:{% if prog.pourcentage == 100 %}var(--wh2){% elif prog.pourcentage > 0 %}var(--gold){% else %}var(--mu2){% endif %}">
-          {{ prog.pourcentage }}%
-        </span>
-      </div>
-      <div class="prog-track">
-        <div class="prog-fill {% if prog.pourcentage == 100 %}prog-fill-white{% elif prog.pourcentage > 0 %}prog-fill-gold{% else %}prog-fill-muted{% endif %}"
-             style="width:{{ prog.pourcentage }}%"></div>
-      </div>
+  <!-- ═══ CARTE MES NIVEAUX ═══ -->
+  <div class="card" style="margin-bottom:12px;padding:1.25rem">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+      <span style="font-size:1.3rem">📊</span>
+      <span style="font-size:15px;font-weight:600;color:var(--wh)">Mes niveaux</span>
     </div>
-    {% empty %}
-    <p style="color:var(--mu);font-size:13px">Commence un cours pour voir ta progression ici.</p>
-    {% endfor %}
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px">
+      {% for n in niveaux_matieres %}
+      <div style="display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:6px;background:var(--bg3);border:1px solid var(--bd)">
+        <span style="font-size:1.2rem">{{ n.emoji }}</span>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:12px;color:var(--wh2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ n.nom }}</div>
+          <span class="badge" style="font-size:10px;background:{% if n.niveau == 'avance' %}rgba(46,204,113,0.15){% elif n.niveau == 'intermediaire' %}rgba(52,152,219,0.15){% else %}rgba(255,255,255,0.08){% endif %};color:{% if n.niveau == 'avance' %}#2ECC71{% elif n.niveau == 'intermediaire' %}#3498DB{% else %}var(--mu){% endif %};border:1px solid {% if n.niveau == 'avance' %}rgba(46,204,113,0.3){% elif n.niveau == 'intermediaire' %}rgba(52,152,219,0.3){% else %}rgba(255,255,255,0.1){% endif %}">
+            {% if n.niveau == 'debutant' %}🔵 Débutant{% elif n.niveau == 'intermediaire' %}🟡 Intermédiaire{% elif n.niveau == 'avance' %}🟢 Avancé{% else %}⚪ Non évalué{% endif %}
+          </span>
+        </div>
+      </div>
+      {% empty %}
+      <div style="font-size:13px;color:var(--mu);grid-column:1/-1;text-align:center;padding:8px">
+        Passe un test de niveau pour commencer.
+      </div>
+      {% endfor %}
+    </div>
   </div>
 
+  <!-- ═══ GRID: TUTEUR AI + EXAMENS + CONTACT ═══ -->
+  <div class="grid-3" style="margin-bottom:12px">
+
+    <!-- Tuteur AI Card -->
+    <a href="{% url 'tuteur' %}" class="card" style="text-decoration:none;display:flex;flex-direction:column;gap:0.5rem;border-top:3px solid var(--gold);transition:border-color 0.2s" onmouseover="this.style.borderColor='var(--gold2)'" onmouseout="this.style.borderColor='var(--gold)'">
+      <div style="display:flex;align-items:center;justify-content:space-between">
+        <span class="exam-label">TUTEUR IA</span>
+        <span style="font-size:1.2rem">🤖</span>
+      </div>
+      <div style="font-size:14px;color:var(--wh2);line-height:1.5">
+        Pose tes questions en français et reçois des explications claires avec des exemples de code.
+      </div>
+      <div style="font-size:12px;color:var(--gold);font-family:var(--fc);margin-top:auto">
+        Disponible 24/7 →
+      </div>
+    </a>
+
+    <!-- Examens Card -->
+    <a href="{% url 'examens_list' %}" class="card" style="text-decoration:none;display:flex;flex-direction:column;gap:0.5rem;border-top:3px solid {% if formations_avec_examens > 0 %}#2ECC71{% else %}var(--bd){% endif %};transition:border-color 0.2s">
+      <div style="display:flex;align-items:center;justify-content:space-between">
+        <span class="exam-label">EXAMENS</span>
+        <span style="font-size:1.2rem">📋</span>
+      </div>
+      <div style="font-size:14px;color:var(--wh2);line-height:1.5">
+        Chaque matière a son propre examen. Débloque-les en complétant les exercices.
+      </div>
+      <div style="font-size:12px;color:var(--gold);font-family:var(--fc);margin-top:auto">
+        Voir les examens →
+      </div>
+    </a>
+
+    <!-- Contact Admin Card -->
+    <a href="{% url 'contact_admin' %}" class="card" style="text-decoration:none;display:flex;flex-direction:column;gap:0.5rem;border-top:3px solid var(--bd);transition:border-color 0.2s" onmouseover="this.style.borderColor='var(--mu)'" onmouseout="this.style.borderColor='var(--bd)'">
+      <div style="display:flex;align-items:center;justify-content:space-between">
+        <span class="exam-label">CONTACT</span>
+        <span style="font-size:1.2rem">📩</span>
+      </div>
+      <div style="font-size:14px;color:var(--wh2);line-height:1.5">
+        Envoie une demande de changement de mot de passe à l'administrateur.
+      </div>
+      <div style="font-size:12px;color:var(--gold);font-family:var(--fc);margin-top:auto">
+        Contacter l'administrateur →
+      </div>
+    </a>
+
+  </div>
+
+  </div>
+
+  <!-- ═══ EXISTING GRID-2 ═══ -->
   <div class="grid-2">
 
     <!-- Activité récente -->
@@ -91,17 +167,26 @@
 
   </div>
 
-  {% if peut_passer_examen %}
-  <div class="card" style="margin-top:12px;border-color:rgba(212,168,67,0.3);background:rgba(212,168,67,0.05)">
-    <div style="display:flex;align-items:center;justify-content:space-between">
-      <div>
-        <div class="card-title" style="color:var(--gold)">Examen final disponible</div>
-        <div style="font-size:13px;color:var(--wh2)">Tu as terminé tous les modules requis. Bonne chance !</div>
-      </div>
-      <a href="{% url 'examen' %}" class="btn btn-gold">Passer l'examen</a>
-    </div>
-  </div>
-  {% endif %}
-
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  document.querySelectorAll('.overview-num, .metric-val').forEach(el => {
+    const text = el.textContent.trim();
+    const num = parseInt(text);
+    if (!isNaN(num) && num > 0 && text === String(num)) {
+      const step = Math.max(1, Math.floor(num / 30));
+      let current = 0;
+      el.textContent = '0';
+      const interval = setInterval(() => {
+        current += step;
+        if (current >= num) { current = num; clearInterval(interval); }
+        el.textContent = current;
+      }, 30);
+    }
+  });
+});
+</script>
 {% endblock %}

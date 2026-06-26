@@ -1,0 +1,45 @@
+{% extends 'professor/base_professor.html' %}
+{% block title %}Leçons — {{ cours.titre }} — CodeMentor AI{% endblock %}
+{% block content %}
+<div class="page-content">
+
+  <a href="{% url 'professor_courses' %}" class="btn btn-ghost" style="margin-bottom:1rem">← Cours</a>
+
+  <div class="dash-header">
+    <div>
+      <div class="greet-name">{{ cours.emoji }} {{ cours.titre }}</div>
+      <div class="greet-sub">{{ count }} leçon(s) · {{ chapters|length }} chapitre(s)</div>
+    </div>
+    <a href="{% url 'professor_lesson_create' cours.slug %}" class="btn btn-primary btn-sm">+ Nouvelle leçon</a>
+  </div>
+
+  {% for ch in chapters %}
+  <div class="card" style="margin-bottom:12px">
+    <div class="card-title">{{ ch }}</div>
+    <div style="display:flex;flex-direction:column;gap:6px">
+      {% for l in lessons %}
+      {% if l.chapitre == ch or ch == 'Général' and not l.chapitre %}
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;border-radius:6px;background:var(--bg3);font-size:13px">
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="color:var(--mu);font-family:var(--fc);font-size:11px">{{ l.ordre }}</span>
+          <span style="color:var(--wh)">{{ l.titre }}</span>
+          {% if l.video_url %}<span style="font-size:10px">🎬</span>{% endif %}
+          {% if l.pdf_url %}<span style="font-size:10px">📄</span>{% endif %}
+        </div>
+        <div style="display:flex;gap:4px">
+          <a href="{% url 'professor_lesson_edit' cours.slug l.id %}" class="btn btn-ghost btn-sm">Modifier</a>
+          <a href="{% url 'professor_lesson_delete' cours.slug l.id %}" class="btn btn-sm btn-delete" onclick="return confirm('Supprimer {{ l.titre }} ?')">Supprimer</a>
+        </div>
+      </div>
+      {% endif %}
+      {% endfor %}
+    </div>
+  </div>
+  {% empty %}
+  <div class="card" style="text-align:center;padding:2rem;color:var(--mu)">
+    Aucune leçon. <a href="{% url 'professor_lesson_create' cours.slug %}" style="color:var(--gold)">Créer une leçon</a>
+  </div>
+  {% endfor %}
+
+</div>
+{% endblock %}

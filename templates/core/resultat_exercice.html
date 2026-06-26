@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+{% block title %}Résultat — CodeMentor AI{% endblock %}
+{% block content %}
+<div class="page-content">
+
+  <div class="card" style="max-width:560px;margin:2rem auto;text-align:center">
+    <div style="font-size:3rem;margin-bottom:1rem">✅</div>
+    <h2 style="margin-bottom:0.5rem">Exercice réussi !</h2>
+    <div style="font-size:14px;color:var(--wh2);margin-bottom:1.5rem">
+      Tu as gagné <strong style="color:var(--gold)">+{{ score_obtenu }} XP</strong>
+      pour "{{ exercice.titre }}".
+    </div>
+
+    <div style="display:flex;gap:1.5rem;justify-content:center;margin-bottom:1rem;flex-wrap:wrap">
+      <div>
+        <div style="font-size:11px;color:var(--mu);font-family:var(--fc)">Exercices faits</div>
+        <div style="font-size:1.5rem;font-weight:700;color:var(--wh);font-family:var(--fd)">{{ nb_exercices_faits }} / 8</div>
+      </div>
+      <div>
+        <div style="font-size:11px;color:var(--mu);font-family:var(--fc)">XP total</div>
+        <div style="font-size:1.5rem;font-weight:700;color:var(--gold);font-family:var(--fd)">{{ score_global }} / 100</div>
+      </div>
+    </div>
+
+    {% if acces_examen.debloque %}
+    <div style="background:rgba(212,168,67,0.1);border:1px solid rgba(212,168,67,0.3);padding:1rem;border-radius:8px;margin-bottom:1.5rem">
+      <div style="font-size:1.2rem;margin-bottom:4px">🎉 Félicitations !</div>
+      <div style="font-size:13px;color:var(--wh2)">L'examen final est débloqué !</div>
+    </div>
+    <a href="{% url 'examen_final' %}" class="btn btn-gold">Passer l'examen final →</a>
+    {% endif %}
+
+    <div style="margin-top:1.5rem;display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
+      {% if back_to_exercices_url %}
+      <a href="{{ back_to_exercices_url }}" class="btn btn-gold">📝 Continuer les exercices</a>
+      {% endif %}
+      {% if next_lesson_url %}
+      <a href="{{ next_lesson_url }}" class="btn btn-ghost">➡ Leçon suivante</a>
+      {% endif %}
+      {% if not back_to_exercices_url and not next_lesson_url %}
+        {% if lesson and formation and cours %}
+        <a href="{% url 'lecon_detail' slug=formation.slug %}?module={{ cours.slug }}&lecon={{ lesson.ordre }}" class="btn btn-ghost">← Retour à la leçon</a>
+        {% else %}
+        <a href="{% url 'cours_list' %}" class="btn btn-ghost">← Retour aux cours</a>
+        {% endif %}
+      {% endif %}
+    </div>
+  </div>
+
+</div>
+{% endblock %}

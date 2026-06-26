@@ -1,0 +1,71 @@
+{% extends 'admin/base_admin.html' %}
+{% block title %}Détails — {{ profil.username }} — CodeMentor AI{% endblock %}
+{% block content %}
+<div class="page-content">
+
+  <a href="{% url 'admin_students' %}" class="btn btn-ghost" style="margin-bottom:1rem">← Retour</a>
+
+  <div class="dash-header">
+    <div class="user-row">
+      <div class="avatar" style="width:48px;height:48px;font-size:16px">{{ profil.username|upper|slice:":2" }}</div>
+      <div>
+        <div class="greet-name">{{ profil.fullname|default:profil.username }}</div>
+        <div class="greet-sub">
+          @{{ profil.username }} · 
+          <span class="badge {% if profil.role == 'admin' %}badge-gold{% elif profil.role == 'professor' %}badge-white{% else %}badge-muted{% endif %}">{{ profil.role }}</span>
+          <span class="badge {% if profil.status == 'approved' %}badge-gold{% elif profil.status == 'pending' %}badge-white{% else %}badge-muted{% endif %}">{{ profil.status }}</span>
+        </div>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px">
+      <a href="{% url 'admin_password_reset' profil.user_id %}" class="btn btn-ghost btn-sm">Réinitialiser mot de passe</a>
+    </div>
+  </div>
+
+  <div class="grid-2" style="margin-bottom:12px">
+    <div class="card">
+      <div class="card-title">Informations</div>
+      <div class="detail-row"><span>Rôle</span><span>{{ profil.role }}</span></div>
+      <div class="detail-row"><span>Statut</span><span>{{ profil.status }}</span></div>
+      <div class="detail-row"><span>Email</span><span>{{ user.email|default:profil.email|default:'—' }}</span></div>
+      <div class="detail-row"><span>Membre depuis</span><span>{{ profil.cree_le|date:"d/m/Y" }}</span></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Activité</div>
+      {% if profil.role == 'professor' %}
+      <div class="detail-row"><span>Cours créés</span><span>{{ course_count }}</span></div>
+      {% endif %}
+      <div class="detail-row"><span>Exercices résolus</span><span>{{ resolu_count }} / {{ total_resolutions }}</span></div>
+      <div class="detail-row" style="margin-top:12px"><span>Activités récentes</span></div>
+      <ul class="act-list" style="margin-top:6px">
+        {% for a in activities %}
+        <li style="font-size:11px">
+          <div class="act-bar" style="background:{% if a.type == 'cours' %}var(--wh){% elif a.type == 'exercice' %}var(--gold){% else %}var(--mu){% endif %}"></div>
+          {{ a.description }}
+          <span class="act-time">{{ a.date|timesince }}</span>
+        </li>
+        {% empty %}
+        <li style="color:var(--mu);font-size:12px">Aucune activité</li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+
+  {% if profil.role == 'student' %}
+  <div class="card">
+    <div class="card-title">XP par matière</div>
+    <div style="display:flex;flex-direction:column;gap:8px;padding:0.5rem 0">
+      {% for fp in formations_progress %}
+      <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--bd);padding:4px 0;font-size:13px">
+        <span style="color:var(--wh)">{{ fp.formation_nom }}</span>
+        <span style="font-weight:600;color:var(--gold);font-family:var(--fc)">{{ fp.xp }} XP</span>
+      </div>
+      {% empty %}
+      <span style="color:var(--mu);font-size:13px">Aucune activité XP</span>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+</div>
+{% endblock %}

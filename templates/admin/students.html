@@ -1,0 +1,106 @@
+{% extends 'admin/base_admin.html' %}
+{% block title %}Gestion des étudiants — CodeMentor AI{% endblock %}
+{% block content %}
+<div class="page-content">
+
+  <div class="dash-header">
+    <div>
+      <div class="greet-name">Gestion des étudiants</div>
+      <div class="greet-sub">{{ count_total }} étudiant(s) · {{ count_approved }} approuvés · {{ count_pending }} en attente · {{ count_rejected }} rejetés</div>
+    </div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap">
+      <a href="?status=approved" class="filter-btn {% if status_filter == 'approved' %}active{% endif %}">Approuvés</a>
+      <a href="?status=pending" class="filter-btn {% if status_filter == 'pending' %}active{% endif %}">En attente</a>
+      <a href="?status=rejected" class="filter-btn {% if status_filter == 'rejected' %}active{% endif %}">Rejetés</a>
+      <a href="{% url 'admin_students' %}" class="filter-btn {% if not status_filter %}active{% endif %}">Tous</a>
+    </div>
+  </div>
+
+  <form method="get" style="margin-bottom:1rem">
+    <div style="display:flex;gap:8px">
+      <input type="text" name="search" class="form-control" placeholder="Rechercher un étudiant…" value="{{ search }}" style="max-width:300px">
+      {% if status_filter %}<input type="hidden" name="status" value="{{ status_filter }}">{% endif %}
+      <button type="submit" class="btn btn-ghost btn-sm">Rechercher</button>
+    </div>
+  </form>
+
+  <div class="table-wrap">
+    <table class="admin-table">
+      <thead>
+        <tr>
+          <th>Utilisateur</th>
+          <th>Email</th>
+          <th>Statut</th>
+          <th>Compte actif</th>
+          <th>Inscrit le</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for s in students %}
+        <tr>
+          <td>
+            <div style="display:flex;align-items:center;gap:8px">
+              <div class="avatar" style="width:30px;height:30px;font-size:11px">{{ s.profil.username|upper|slice:":2" }}</div>
+              <div>
+                <div style="font-size:13px;font-weight:500;color:var(--wh)">{{ s.profil.fullname|default:s.profil.username }}</div>
+                <div style="font-size:10px;color:var(--mu);font-family:var(--fc)">@{{ s.profil.username }}</div>
+              </div>
+            </div>
+          </td>
+          <td><span style="font-size:12px;color:var(--wh2)">{{ s.email|default:'—' }}</span></td>
+          <td>
+            {% if s.profil.status == 'approved' %}
+              <span class="status-badge status-approved">Approuvé</span>
+            {% elif s.profil.status == 'pending' %}
+              <span class="status-badge status-pending">En attente</span>
+            {% else %}
+              <span class="status-badge status-rejected">Rejeté</span>
+            {% endif %}
+          </td>
+          <td>
+            {% if s.is_active %}
+              <span class="status-badge status-approved">Actif</span>
+            {% else %}
+              <span class="status-badge status-rejected">Inactif</span>
+            {% endif %}
+          </td>
+          <td><span style="font-size:11px;color:var(--mu);font-family:var(--fc)">{{ s.profil.cree_le|date:"d/m/Y" }}</span></td>
+          <td>
+            <div class="action-row">
+              {% if s.profil.status == 'pending' %}
+                <a href="{% url 'admin_student_approve' s.profil.user_id %}" class="btn btn-sm" style="background:var(--green,#2ECC71);color:#fff">Approuver</a>
+                <a href="{% url 'admin_student_reject' s.profil.user_id %}" class="btn btn-sm" style="background:#e74c3c;color:#fff">Rejeter</a>
+              {% endif %}
+              <a href="{% url 'admin_student_toggle_active' s.profil.user_id %}" class="btn btn-ghost btn-sm">
+                {% if s.is_active %}Désactiver{% else %}Activer{% endif %}
+              </a>
+              <a href="{% url 'admin_user_detail' s.profil.user_id %}" class="btn btn-ghost btn-sm">Détails</a>
+              <a href="{% url 'admin_password_reset' s.profil.user_id %}" class="btn btn-ghost btn-sm">Mot de passe</a>
+              <a href="{% url 'admin_student_delete' s.profil.user_id %}" class="btn btn-sm btn-delete" onclick="return confirm('Supprimer définitivement {{ s.profil.username }} ?')">Supprimer</a>
+            </div>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="6" style="text-align:center;color:var(--mu);padding:2rem">Aucun étudiant trouvé.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  {% if total_pages > 1 %}
+  <div class="pagination">
+    {% if page > 1 %}
+      <a href="?page={{ page|add:-1 }}{% if search %}&search={{ search }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}" class="page-link">←</a>
+    {% endif %}
+    {% for p in ""|ljust:total_pages %}
+      <a href="?page={{ forloop.counter }}{% if search %}&search={{ search }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}" class="page-link {% if forloop.counter == page %}active{% endif %}">{{ forloop.counter }}</a>
+    {% endfor %}
+    {% if page < total_pages %}
+      <a href="?page={{ page|add:1 }}{% if search %}&search={{ search }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}" class="page-link">→</a>
+    {% endif %}
+  </div>
+  {% endif %}
+
+</div>
+{% endblock %}

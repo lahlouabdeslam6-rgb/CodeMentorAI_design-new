@@ -1,0 +1,13 @@
+<nav class="nav">
+  <a href="{% url 'admin_dashboard' %}" class="logo" style="text-decoration:none">
+    <div class="logo-sq"><span>CM</span></div>
+    <span style="color:var(--gold);font-size:10px;font-family:var(--fc);letter-spacing:0.05em">ADMIN</span>
+  </a>
+  <div class="nav-links">
+    <a href="{% url 'admin_dashboard' %}" class="nav-link {% if request.resolver_match.url_name == 'admin_dashboard' %}active{% endif %}">Dashboard</a>
+    <a href="{% url 'admin_students' %}" class="nav-link {% if request.resolver_match.url_name == 'admin_students' %}active{% endif %}">Étudiants</a>
+    <a href="{% url 'admin_professors' %}" class="nav-link {% if request.resolver_match.url_name == 'admin_professors' or 'admin_professor' in request.resolver_match.url_name %}active{% endif %}">Professeurs</a>
+    <a href="{% url 'admin_password_requests' %}" class="nav-link {% if request.resolver_match.url_name == 'admin_password_requests' %}active{% endif %}">Demandes</a>
+    <a href="{% url 'logout' %}" class="nav-link">Déconnexion</a>
+  </div>
+</nav>

@@ -4,7 +4,13 @@
 {% block content %}
 <div class="page-content">
 
-  <a href="{% url 'cours_list' %}" class="btn btn-ghost" style="margin-bottom:1rem">← Retour aux cours</a>
+  <div style="display:flex;gap:8px;margin-bottom:1rem;justify-content:space-between;align-items:center">
+    {% if formation and cours and lesson %}
+    <a href="{% url 'lecon_detail' slug=formation.slug %}?module={{ cours.slug }}&lecon={{ lesson.ordre }}" class="btn btn-ghost" style="padding:6px 14px;font-size:12px">← Retour à la leçon</a>
+    {% else %}
+    <a href="{% url 'cours_list' %}" class="btn btn-ghost" style="padding:6px 14px;font-size:12px">← Cours</a>
+    {% endif %}
+  </div>
 
   <div class="card">
     <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:1rem">
@@ -14,7 +20,7 @@
       <div>
         <h2 style="margin:0">{{ exercice.titre }}</h2>
         <span class="diff {% if exercice.difficulte == 'facile' %}diff-easy{% elif exercice.difficulte == 'moyen' %}diff-medium{% else %}diff-hard{% endif %}">
-          {{ exercice.get_difficulte_display|upper }}
+          {{ exercice.get_difficulte_label|upper }}
         </span>
         <span style="color:var(--gold);font-size:13px;margin-left:0.5rem">+{{ exercice.points }} XP</span>
       </div>
@@ -24,16 +30,36 @@
       {{ exercice.enonce }}
     </div>
 
+    {% if erreur %}
+    <div id="error-msg" style="background:rgba(231,76,60,0.12);border:1px solid rgba(231,76,60,0.4);padding:1rem 1.25rem;border-radius:8px;margin-bottom:1.5rem;text-align:center;animation:fadeIn 0.3s ease">
+      <div style="font-size:2rem;margin-bottom:0.5rem">❌</div>
+      <div style="font-size:15px;font-weight:600;color:#C0392B;margin-bottom:2px">Réponse incorrecte !</div>
+      <div style="font-size:13px;color:#E74C3C">{{ erreur }}</div>
+      <a href="{% url 'exercice_detail' exercice.id %}" class="btn" style="display:inline-flex;align-items:center;gap:6px;margin-top:12px;background:#E74C3C;color:#fff;padding:8px 24px;border-radius:6px;font-size:13px;font-weight:600;text-decoration:none;transition:background 0.2s" onmouseover="this.style.background='#C0392B'" onmouseout="this.style.background='#E74C3C'">🔄 Réessayer l'exercice</a>
+    </div>
+    {% endif %}
+
     {% if resolution.resolu %}
-      <div class="alert alert-success" style="background:rgba(212,168,67,0.1);border:1px solid rgba(212,168,67,0.3);padding:0.75rem 1rem;border-radius:6px;color:var(--gold)">
-        ✅ Exercice déjà résolu !
+      {% if not erreur %}
+      <div style="background:rgba(46,204,113,0.12);border:1px solid rgba(46,204,113,0.3);padding:1rem;border-radius:8px;text-align:center;animation:fadeIn 0.3s ease">
+        <div style="font-size:2rem;margin-bottom:0.5rem">✅</div>
+        <div style="font-size:15px;font-weight:600;color:#27AE60;margin-bottom:4px">Bonne réponse !</div>
+        <div style="font-size:13px;color:var(--wh2);margin-bottom:12px">Exercice réussi. +{{ exercice.points }} XP</div>
+        {% if next_lesson_url %}
+        <a href="{{ next_lesson_url }}" class="btn btn-gold">➡ Leçon suivante</a>
+        {% elif formation and cours and lesson %}
+        <a href="{% url 'lecon_detail' slug=formation.slug %}?module={{ cours.slug }}&lecon={{ lesson.ordre }}" class="btn btn-ghost">← Retour à la leçon</a>
+        {% else %}
+        <a href="{% url 'cours_list' %}" class="btn btn-ghost">← Retour aux cours</a>
+        {% endif %}
       </div>
+      {% endif %}
     {% else %}
       <form method="post">
         {% csrf_token %}
         <div class="form-group">
           <label class="form-label">Ta réponse</label>
-          <textarea name="reponse" class="form-control" rows="6" placeholder="Écris ta solution ici…" required style="font-family:'Fira Code',monospace;font-size:14px"></textarea>
+          <textarea name="reponse" class="form-control" rows="6" placeholder="Écris ta solution ici…" required style="font-family:'Fira Code',monospace;font-size:14px">{{ request.POST.reponse|default:'' }}</textarea>
         </div>
         <button type="submit" class="btn btn-primary">Soumettre</button>
       </form>
@@ -41,4 +67,11 @@
   </div>
 
 </div>
+
+<style>
+@keyframes fadeIn {
+  from { opacity:0; transform:translateY(-6px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+</style>
 {% endblock %}

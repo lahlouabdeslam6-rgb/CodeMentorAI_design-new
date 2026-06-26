@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% block title %}Compte en attente — CodeMentor AI{% endblock %}
+{% block content %}
+<div class="auth-wrapper">
+  <div class="auth-box" style="text-align:center">
+    <div style="font-size:3rem;margin-bottom:1rem">⏳</div>
+    <div class="auth-title">Compte en attente d'approbation</div>
+    <div class="auth-sub" style="margin-bottom:1.5rem">
+      Ton compte est en cours de vérification par un administrateur.<br>
+      Tu recevras un accès complet une fois approuvé.
+    </div>
+    <div style="padding:0.75rem;background:rgba(212,168,67,0.08);border-radius:6px;border:1px solid rgba(212,168,67,0.15);font-size:12px;color:var(--gold2)">
+      En attendant, tu peux consulter la page d'accueil.
+    </div>
+    <div style="margin-top:1.5rem;display:flex;gap:8px;justify-content:center">
+      <a href="{% url 'home' %}" class="btn btn-ghost">Accueil</a>
+      <a href="{% url 'logout' %}" class="btn btn-ghost">Déconnexion</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,6 @@
+{% extends 'base.html' %}
+{% block title %}Administration — {{ block.super }}{% endblock %}
+{% block extra_css %}{{ block.super }}<style>.admin-only{display:block}</style>{% endblock %}
+{% block nav %}
+{% include 'admin/_nav.html' %}
+{% endblock %}

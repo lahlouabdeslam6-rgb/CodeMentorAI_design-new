@@ -1,18 +1,61 @@
 from django.urls import path
-from django.contrib.auth import views as auth_views
 from . import views
+from . import admin_views
+from . import professor_views
 
 urlpatterns = [
     path('', views.home, name='home'),
-    path('login/', auth_views.LoginView.as_view(template_name='core/login.html'), name='login'),
+    path('login/', views.CustomLoginView.as_view(), name='login'),
     path('register/', views.register, name='register'),
-    path('logout/', auth_views.LogoutView.as_view(), name='logout'),
+    path('logout/', views.logout_view, name='logout'),
     path('dashboard/', views.dashboard, name='dashboard'),
     path('cours/', views.cours_list, name='cours_list'),
-    path('cours/<slug:slug>/', views.cours_detail, name='cours_detail'),
+    path('cours/<slug:slug>/', views.formation_detail, name='cours_detail'),
+    path('formation/<slug:slug>/', views.formation_detail, name='formation_detail'),
+    path('cours/<slug:slug>/lecon/', views.lecon_detail, name='lecon_detail'),
+    path('niveau-test/', views.niveau_test, name='niveau_test'),
     path('diagnostic/', views.diagnostic, name='diagnostic'),
+    path('test/<slug:slug>/', views.test_niveau_matiere, name='test_niveau_matiere'),
     path('tuteur/', views.tuteur, name='tuteur'),
     path('tuteur/message/', views.tuteur_message, name='tuteur_message'),
+    path('cours/<slug:slug>/lecon/exercices/', views.lecon_exercices, name='lecon_exercices'),
     path('exercice/<str:pk>/', views.exercice_detail, name='exercice_detail'),
-    path('examen/', views.examen, name='examen'),
+    path('exercices/', views.exercises_list_redirect, name='exercises_list'),
+    path('examens/', views.examens_list, name='examens_list'),
+    path('examen/', views.examen_final, name='examen_final'),
+    path('examen/resultat/', views.examen_final, name='examen_resultat'),
+    path('contact-admin/', views.contact_admin, name='contact_admin'),
+    path('profile/edit/', views.profile_edit, name='profile_edit'),
+
+    # Admin
+    path('admin-panel/', admin_views.admin_dashboard, name='admin_dashboard'),
+    path('admin-panel/students/', admin_views.admin_students, name='admin_students'),
+    path('admin-panel/students/<int:user_id>/approve/', admin_views.admin_student_approve, name='admin_student_approve'),
+    path('admin-panel/students/<int:user_id>/reject/', admin_views.admin_student_reject, name='admin_student_reject'),
+    path('admin-panel/students/<int:user_id>/toggle-active/', admin_views.admin_student_toggle_active, name='admin_student_toggle_active'),
+    path('admin-panel/students/<int:user_id>/delete/', admin_views.admin_student_delete, name='admin_student_delete'),
+    path('admin-panel/professors/', admin_views.admin_professors, name='admin_professors'),
+    path('admin-panel/professors/create/', admin_views.admin_professor_create, name='admin_professor_create'),
+    path('admin-panel/professors/<int:user_id>/edit/', admin_views.admin_professor_edit, name='admin_professor_edit'),
+    path('admin-panel/professors/<int:user_id>/delete/', admin_views.admin_professor_delete, name='admin_professor_delete'),
+    path('admin-panel/user/<int:user_id>/', admin_views.admin_user_detail, name='admin_user_detail'),
+    path('admin-panel/user/<int:user_id>/password-reset/', admin_views.admin_password_reset, name='admin_password_reset'),
+    path('admin-panel/password-requests/', admin_views.admin_password_requests, name='admin_password_requests'),
+    path('admin-panel/password-requests/<request_id>/<str:action>/', admin_views.admin_password_request_action, name='admin_password_request_action'),
+
+    # Contact admin
+    path('professor/', professor_views.professor_dashboard, name='professor_dashboard'),
+    path('professor/courses/', professor_views.professor_courses, name='professor_courses'),
+    path('professor/courses/create/', professor_views.professor_course_create, name='professor_course_create'),
+    path('professor/courses/<slug:slug>/edit/', professor_views.professor_course_edit, name='professor_course_edit'),
+    path('professor/courses/<slug:slug>/delete/', professor_views.professor_course_delete, name='professor_course_delete'),
+    path('professor/courses/<slug:slug>/lessons/', professor_views.professor_lessons, name='professor_lessons'),
+    path('professor/courses/<slug:slug>/lessons/create/', professor_views.professor_lesson_create, name='professor_lesson_create'),
+    path('professor/courses/<slug:slug>/lessons/<lesson_id>/edit/', professor_views.professor_lesson_edit, name='professor_lesson_edit'),
+    path('professor/courses/<slug:slug>/lessons/<lesson_id>/delete/', professor_views.professor_lesson_delete, name='professor_lesson_delete'),
+    path('professor/courses/<slug:slug>/exercises/', professor_views.professor_exercises, name='professor_exercises'),
+    path('professor/courses/<slug:slug>/exercises/create/', professor_views.professor_exercise_create, name='professor_exercise_create'),
+    path('professor/courses/<slug:slug>/exercises/<exercise_id>/edit/', professor_views.professor_exercise_edit, name='professor_exercise_edit'),
+    path('professor/courses/<slug:slug>/exercises/<exercise_id>/delete/', professor_views.professor_exercise_delete, name='professor_exercise_delete'),
+    path('professor/students/', professor_views.professor_students, name='professor_students'),
 ]

@@ -1,0 +1,51 @@
+{% extends 'professor/base_professor.html' %}
+{% block title %}{% if edit %}Modifier{% else %}Créer{% endif %} une leçon — CodeMentor AI{% endblock %}
+{% block content %}
+<div class="page-content">
+
+  <a href="{% url 'professor_lessons' cours.slug %}" class="btn btn-ghost" style="margin-bottom:1rem">← Leçons</a>
+
+  <div class="card" style="max-width:700px">
+    <div class="card-title">{{ cours.titre }} · {% if edit %}Modifier la leçon{% else %}Nouvelle leçon{% endif %}</div>
+
+    <form method="post" enctype="multipart/form-data">
+      {% csrf_token %}
+      <div class="form-group">
+        <label class="form-label">Titre</label>
+        <input type="text" name="titre" class="form-control" value="{{ lesson.titre|default:'' }}" required>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Contenu (Markdown)</label>
+        <textarea name="content" class="form-control" rows="12" style="font-family:var(--fc);font-size:13px">{{ lesson.content|default:'' }}</textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Chapitre</label>
+        <input type="text" name="chapitre" class="form-control" value="{{ lesson.chapitre|default:'Général' }}" list="chapters">
+        <datalist id="chapters">
+          {% for ch in chapters %}<option value="{{ ch }}">{% endfor %}
+        </datalist>
+      </div>
+      <div class="grid-2">
+        <div class="form-group">
+          <label class="form-label">URL Vidéo</label>
+          <input type="url" name="video_url" class="form-control" value="{{ lesson.video_url|default:'' }}" placeholder="https://youtube.com/...">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Télécharger un PDF</label>
+          <input type="file" name="pdf_file" class="form-control" accept=".pdf" style="padding:8px 13px">
+          <div style="font-size:10px;color:var(--mu);margin-top:4px">PDF uniquement · Max 20 Mo</div>
+          {% if edit and lesson.pdf_url %}
+          <div style="margin-top:8px;font-size:12px;color:var(--wh2)">
+            📄 Fichier actuel : <a href="{{ MEDIA_URL }}{{ lesson.pdf_url }}" target="_blank" style="color:var(--gold)">Voir le PDF</a>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+      <button type="submit" class="btn btn-primary">
+        {% if edit %}Enregistrer{% else %}Créer la leçon{% endif %}
+      </button>
+    </form>
+  </div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,176 @@
+{% extends 'base.html' %}
+{% block title %}{{ lesson.titre }} — {{ cours.titre }} — CodeMentor AI{% endblock %}
+{% block extra_css %}
+<style>
+/* Leçon content styling */
+.lecon-body h1 { font-size:1.75rem; margin:1.5rem 0 0.75rem; color:var(--white); font-family:var(--fd); }
+.lecon-body h2 { font-size:1.35rem; margin:1.25rem 0 0.6rem; color:var(--white); font-family:var(--fd); }
+.lecon-body h3 { font-size:1.1rem; margin:1rem 0 0.5rem; color:var(--wh2); font-family:var(--fd); }
+.lecon-body p  { font-size:15px; line-height:1.75; color:var(--wh2); margin-bottom:1rem; }
+.lecon-body ul, .lecon-body ol { margin:0 0 1rem 1.5rem; color:var(--wh2); font-size:15px; line-height:1.75; }
+.lecon-body li { margin-bottom:0.35rem; }
+.lecon-body code { background:var(--bg2); color:var(--gold); padding:2px 6px; border-radius:3px; font-size:13px; font-family:'Fira Code',monospace; }
+.lecon-body pre { background:var(--bg2); border:1px solid var(--bg3); border-radius:6px; padding:1rem; margin-bottom:1rem; overflow-x:auto; }
+.lecon-body pre code { background:none; color:var(--wh2); padding:0; font-size:13px; line-height:1.6; }
+.lecon-body blockquote { border-left:3px solid var(--gold); padding:0.75rem 1rem; margin:0 0 1rem; background:rgba(212,168,67,0.06); border-radius:0 6px 6px 0; color:var(--wh2); font-style:italic; }
+.lecon-body blockquote p { margin-bottom:0; }
+.lecon-body img { max-width:100%; border-radius:6px; margin:1rem 0; }
+.lecon-body a { color:var(--gold); text-decoration:underline; }
+.lecon-body a:hover { color:var(--gold2); }
+.lecon-body table { width:100%; border-collapse:collapse; margin-bottom:1rem; font-size:14px; }
+.lecon-body th, .lecon-body td { border:1px solid var(--bg3); padding:0.5rem 0.75rem; text-align:left; }
+.lecon-body th { background:var(--bg3); color:var(--white); font-weight:500; }
+.lecon-body td { color:var(--wh2); }
+.lecon-body hr { border:none; border-top:1px solid var(--bg3); margin:1.5rem 0; }
+/* Pygments codehilite */
+.lecon-body .codehilite { background:var(--bg2); border:1px solid var(--bg3); border-radius:6px; padding:0; margin-bottom:1rem; overflow-x:auto; }
+.lecon-body .codehilite pre { background:none; border:none; padding:1rem; margin:0; }
+.lecon-body .codehilite .c  { color:#5a7a8a; font-style:italic; }
+.lecon-body .codehilite .k  { color:#c792ea; }
+.lecon-body .codehilite .kt { color:#ffcb6b; }
+.lecon-body .codehilite .s  { color:#c3e88d; }
+.lecon-body .codehilite .s2 { color:#c3e88d; }
+.lecon-body .codehilite .mi { color:#f78c6c; }
+.lecon-body .codehilite .mf { color:#f78c6c; }
+.lecon-body .codehilite .o  { color:#89ddff; }
+.lecon-body .codehilite .p  { color:#d4d4d4; }
+.lecon-body .codehilite .nx { color:#d4d4d4; }
+.lecon-body .codehilite .nb { color:#82aaff; }
+
+/* Reading progress */
+.read-progress { position:fixed; top:0; left:0; height:3px; background:var(--gold); z-index:9999; transition:width 0.1s; }
+
+/* Objectives list */
+.objective-item { display:flex; align-items:flex-start; gap:10px; padding:8px 0; font-size:14px; color:var(--wh2); }
+.objective-item::before { content:'✓'; color:var(--gold); font-weight:700; font-size:14px; flex-shrink:0; }
+
+/* Nav buttons */
+.lecon-nav { display:flex; gap:10px; margin-top:2rem; padding-top:1.5rem; border-top:1px solid var(--bg3); }
+.lecon-nav a { flex:1; text-align:center; }
+@keyframes fadeIn { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-content">
+
+<div class="read-progress" id="readingProgress"></div>
+
+<!-- Back -->
+<a href="{% url 'cours_detail' slug=formation.slug %}" class="btn btn-ghost" style="margin-bottom:1rem">← Retour au parcours</a>
+
+<!-- Main lesson card -->
+<div class="card" style="max-width:800px;margin:0 auto">
+
+  <!-- Progress indicator -->
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:1.5rem;padding-bottom:1rem;border-bottom:1px solid var(--bg3)">
+    <span style="font-size:11px;color:var(--mu);font-family:var(--fc)">Leçon {{ lecon_ordre }} / {{ total_lessons }}</span>
+    <div style="flex:1;background:var(--bg3);border-radius:4px;height:6px;overflow:hidden">
+      <div style="background:var(--gold);height:100%;width:{{ progress_pct }}%;border-radius:4px;transition:width 0.4s"></div>
+    </div>
+    <span style="font-size:11px;color:var(--mu);font-family:var(--fc)">{{ progress_pct }}%</span>
+  </div>
+
+  <!-- Title -->
+  <div style="margin-bottom:1.5rem">
+    <span style="font-size:12px;color:var(--mu);font-family:var(--fc);text-transform:uppercase;letter-spacing:0.05em">{{ cours.titre }}</span>
+    <h1 style="margin:0.25rem 0 0;font-size:1.5rem;color:var(--white)">{{ lesson.titre }}</h1>
+  </div>
+
+  <!-- Video link -->
+  {% if lesson.video_url %}
+  <a href="{{ lesson.video_url }}" target="_blank" class="btn btn-ghost" style="margin-bottom:1.5rem;gap:8px">
+    🎬 Regarder la vidéo sur YouTube
+  </a>
+  {% endif %}
+
+  <!-- PDF -->
+  {% if lesson.pdf_url %}
+  <a href="{{ MEDIA_URL }}{{ lesson.pdf_url }}" target="_blank" class="btn btn-ghost" style="margin-bottom:1.5rem;gap:8px">
+    {% if lesson.pdf_url|lower|slice:'-4:' == '.pdf' %}📖 Ouvrir le PDF{% else %}📄 Télécharger le PDF{% endif %}
+  </a>
+  {% endif %}
+
+  <!-- What you'll learn -->
+  {% if cours.chapitres %}
+  <div style="background:var(--bg4);border-radius:8px;padding:1.25rem;margin-bottom:1.5rem">
+    <h3 style="margin:0 0 0.75rem;font-size:14px;color:var(--gold);text-transform:uppercase;letter-spacing:0.04em">🎯 Ce que vous allez apprendre</h3>
+    {% for ch in cours.chapitres %}
+    <div class="objective-item">{{ ch }}</div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <!-- Content -->
+  {% if content_html %}
+  <div class="lecon-body" style="margin-bottom:1rem;animation:fadeIn 0.4s ease">
+    {{ content_html|safe }}
+  </div>
+  {% else %}
+  <div style="text-align:center;padding:2rem;color:var(--mu)">
+    <p>Aucun contenu disponible pour cette leçon.</p>
+  </div>
+  {% endif %}
+
+  <!-- Exercise section -->
+  {% if exercises %}
+  <div style="margin-top:2rem;padding:1.25rem;background:var(--bg4);border:1px solid var(--bg3);border-radius:10px;animation:fadeIn 0.4s ease">
+    {% if all_completed %}
+    <div style="text-align:center">
+      <div style="font-size:1rem;font-weight:600;color:#2ECC71;margin-bottom:4px">✅ Félicitations !</div>
+      <div style="font-size:13px;color:var(--wh2);margin-bottom:14px">Vous avez terminé tous les exercices de cette leçon.</div>
+      {% if next_lesson %}
+      <a href="{% url 'lecon_detail' slug=formation.slug %}?module={{ cours.slug }}&lecon={{ next_lesson.ordre }}" class="btn btn-gold">➡ Passer à la leçon suivante</a>
+      {% else %}
+      <a href="{% url 'lecon_detail' slug=formation.slug %}?module={{ cours.slug }}&lecon={{ lecon_ordre }}&termine=1" class="btn btn-gold">Terminer le cours ✓</a>
+      {% endif %}
+    </div>
+    {% else %}
+    <div style="display:flex;align-items:flex-start;gap:12px">
+      <div style="font-size:1.5rem;line-height:1">📝</div>
+      <div style="flex:1">
+        <div style="font-size:14px;font-weight:600;color:var(--wh);margin-bottom:4px">Exercices de cette leçon</div>
+        <div style="font-size:12px;color:var(--mu);margin-bottom:12px">
+          Vous avez terminé cette leçon. Il est maintenant temps de tester vos connaissances.
+          <span style="display:block;margin-top:4px;color:var(--gold);font-family:var(--fc)">{{ remaining }} exercice(s) restant(s)</span>
+        </div>
+        <a href="{% url 'lecon_exercices' slug=formation.slug %}?module={{ cours.slug }}&lecon={{ lecon_ordre }}" class="btn btn-gold">🚀 Commencer les exercices</a>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+  {% else %}
+  <div style="margin-top:2rem;padding:1.25rem;background:var(--bg4);border:1px solid var(--bg3);border-radius:10px;text-align:center;animation:fadeIn 0.4s ease">
+    <div style="font-size:1rem;font-weight:500;color:var(--mu)">📌 Aucun exercice n'est disponible pour cette leçon.</div>
+  </div>
+  {% endif %}
+
+  <!-- Prev / Next nav -->
+  <div class="lecon-nav">
+    {% if prev_lesson %}
+    <a href="{% url 'lecon_detail' slug=formation.slug %}?module={{ cours.slug }}&lecon={{ prev_lesson.ordre }}" class="btn btn-ghost">← {{ prev_lesson.titre|truncatechars:30 }}</a>
+    {% else %}
+    <div></div>
+    {% endif %}
+    {% if next_lesson %}
+    <a href="{% url 'lecon_detail' slug=formation.slug %}?module={{ cours.slug }}&lecon={{ next_lesson.ordre }}" class="btn btn-gold">{{ next_lesson.titre|truncatechars:30 }} →</a>
+    {% else %}
+    <a href="{% url 'lecon_detail' slug=formation.slug %}?module={{ cours.slug }}&lecon={{ lecon_ordre }}&termine=1" class="btn btn-ghost">Terminé ✓</a>
+    {% endif %}
+  </div>
+
+</div>
+
+</div>
+
+<script>
+// Reading progress bar
+window.addEventListener('scroll', function() {
+  const scrollTop = window.scrollY;
+  const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+  const progress = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+  document.getElementById('readingProgress').style.width = progress + '%';
+});
+</script>
+
+{% endblock %}

@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Examens — CodeMentor AI{% endblock %}
+{% block content %}
+<div class="page-content">
+
+  <div class="dash-header">
+    <div>
+      <div class="greet-name">📋 Examens par matière</div>
+      <div class="greet-sub">Chaque matière a son propre examen. Débloque-les en complétant les exercices.</div>
+    </div>
+  </div>
+
+  {% for e in examens %}
+  <div class="card" style="margin-bottom:12px;border-top:3px solid {% if e.debloque %}#2ECC71{% else %}var(--bd){% endif %};transition:border-color 0.2s, box-shadow 0.2s">
+    <div style="display:flex;flex-wrap:wrap;gap:1rem;align-items:flex-start">
+
+      <div style="flex-shrink:0;font-size:3rem;width:64px;text-align:center">{{ e.emoji }}</div>
+
+      <div style="flex:1;min-width:200px">
+        <div style="font-size:1.2rem;font-weight:600;color:var(--wh);margin-bottom:4px">{{ e.nom }}</div>
+        <div style="font-size:12px;color:var(--mu);margin-bottom:10px">{{ e.description }}</div>
+
+        <div style="display:flex;flex-wrap:wrap;gap:12px;font-size:13px">
+          <span style="color:var(--wh2)">📖 Cours : <strong style="color:var(--wh)">{{ e.nb_cours }}</strong></span>
+          <span style="color:var(--wh2)">💪 Exercices : <strong style="color:{% if e.exos_faits >= 8 %}#2ECC71{% else %}var(--gold){% endif %}">{{ e.exos_faits }}</strong> / 8</span>
+          <span style="color:var(--wh2)">🏆 Récompense : <strong style="color:var(--gold)">+100 XP</strong></span>
+          <span style="color:var(--wh2)">⏱ Durée : <strong style="color:var(--wh2)">60 minutes</strong></span>
+        </div>
+
+        {% if not e.debloque and e.exos_total < 8 %}
+        <div style="margin-top:8px;font-size:12px;color:var(--mu)">
+          {% if e.exos_total == 0 %}Aucun exercice disponible pour cette matière.
+          {% else %}Vous devez terminer les 8 exercices {{ e.nom }} avant de débloquer cet examen ({{ e.exos_faits }}/8).{% endif %}
+        </div>
+        {% endif %}
+      </div>
+
+      <div style="flex-shrink:0;display:flex;flex-direction:column;gap:6px;align-items:flex-end;min-width:180px">
+        {% if e.debloque and not e.examen_passe %}
+          <a href="{% url 'examen_final' %}?formation={{ e.slug }}" class="btn" style="background:#2ECC71;color:#fff;padding:10px 24px;border-radius:6px;font-size:13px;font-weight:600;text-decoration:none;display:inline-flex;align-items:center;gap:6px;transition:background 0.2s" onmouseover="this.style.background='#27AE60'" onmouseout="this.style.background='#2ECC71'">🚀 Démarrer l'examen</a>
+        {% elif e.examen_passe and e.examen_reussi %}
+          <span style="font-size:13px;color:#2ECC71;font-weight:600">🏆 Réussi ({{ e.score_examen }}%)</span>
+        {% elif e.examen_passe and not e.examen_reussi %}
+          <div style="text-align:right">
+            <span style="font-size:13px;color:#E74C3C;font-weight:600">❌ Échoué</span>
+            <div style="font-size:11px;color:var(--mu);margin-top:2px">Exercices réinitialisés</div>
+          </div>
+        {% else %}
+          <span class="btn" style="background:var(--bg3);color:var(--mu);padding:10px 24px;border-radius:6px;font-size:13px;font-weight:600;display:inline-flex;align-items:center;gap:6px;cursor:not-allowed;border:1px solid var(--bd)">🔒 Démarrer l'examen</span>
+        {% endif %}
+      </div>
+
+    </div>
+  </div>
+  {% empty %}
+  <div class="card" style="text-align:center;padding:2rem">
+    <div style="font-size:2rem;margin-bottom:0.5rem">📋</div>
+    <p style="color:var(--mu)">Aucune matière disponible pour les examens.</p>
+  </div>
+  {% endfor %}
+
+</div>
+{% endblock %}

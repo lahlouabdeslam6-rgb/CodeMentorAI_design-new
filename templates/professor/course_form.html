@@ -1,0 +1,48 @@
+{% extends 'professor/base_professor.html' %}
+{% block title %}{% if edit %}Modifier{% else %}Créer{% endif %} un cours — CodeMentor AI{% endblock %}
+{% block content %}
+<div class="page-content">
+
+  <a href="{% url 'professor_courses' %}" class="btn btn-ghost" style="margin-bottom:1rem">← Retour</a>
+
+  <div class="card" style="max-width:600px">
+    <div class="card-title">{% if edit %}Modifier le cours{% else %}Nouveau cours{% endif %}</div>
+
+    <form method="post">
+      {% csrf_token %}
+      <div class="form-group">
+        <label class="form-label">Titre</label>
+        <input type="text" name="titre" class="form-control" value="{{ cours.titre|default:'' }}" required>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Description</label>
+        <textarea name="description" class="form-control" rows="4" required>{{ cours.description|default:'' }}</textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Niveau</label>
+        <select name="niveau" class="form-control">
+          <option value="debutant" {% if edit and cours.niveau == 'debutant' %}selected{% endif %}>Débutant</option>
+          <option value="intermediaire" {% if edit and cours.niveau == 'intermediaire' %}selected{% endif %}>Intermédiaire</option>
+          <option value="avance" {% if edit and cours.niveau == 'avance' %}selected{% endif %}>Avancé</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Catégorie</label>
+        <div style="padding:0.6rem 0.8rem;background:var(--bg3);border-radius:6px;font-size:13px;color:var(--wh2);border:1px solid var(--bd)">
+          {% if edit %}{{ cours.category }}{% else %}{{ specialite }}{% endif %}
+          <span style="font-size:10px;color:var(--mu);margin-left:8px">(fixée selon votre spécialité)</span>
+        </div>
+        <input type="hidden" name="category" value="{% if edit %}{{ cours.category }}{% else %}{{ specialite }}{% endif %}">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Emoji</label>
+        <input type="text" name="emoji" class="form-control" value="{% if edit %}{{ cours.emoji }}{% else %}📘{% endif %}" style="max-width:80px">
+      </div>
+      <button type="submit" class="btn btn-primary">
+        {% if edit %}Enregistrer{% else %}Créer le cours{% endif %}
+      </button>
+    </form>
+  </div>
+
+</div>
+{% endblock %}
