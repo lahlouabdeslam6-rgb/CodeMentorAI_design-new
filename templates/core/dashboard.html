@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 {% block title %}Dashboard — CodeMentor AI{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/dashboard.css' %}?v=1">{% endblock %}
 
 {% block content %}
 <div class="page-content">
@@ -159,7 +160,7 @@
           <div class="rm-ico">
             {% if etape.statut == 'done' %}✓{% elif etape.statut == 'current' %}NOW{% else %}—{% endif %}
           </div>
-          <span>{{ etape.titre }}</span>
+          <span>{{ etape.titre }}{% if etape.formation %} <span style="font-size:10px;color:var(--mu)">· {{ etape.formation }}</span>{% endif %}</span>
         </div>
         {% endfor %}
       </div>

@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 {% block title %}{% if formation %}{{ formation.emoji }} {{ formation.nom }} — Examen{% else %}Examen{% endif %} — CodeMentor AI{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/exam.css' %}?v=1">{% endblock %}
 {% block content %}
 <div class="page-content">
 
@@ -115,7 +116,7 @@
         <span style="font-size:13px;color:var(--wh2)">Note de passage : <strong>60%</strong></span>
       </div>
     </div>
-    <a href="{% url 'examen_final' %}?start=1" class="btn" style="width:100%;justify-content:center;background:#2ECC71;color:#fff;border:none;font-weight:600">
+    <a href="{% url 'examen_final' %}?formation={{ formation.slug }}&start=1" class="btn" style="width:100%;justify-content:center;background:#2ECC71;color:#fff;border:none;font-weight:600">
       🚀 Démarrer l'examen
     </a>
 
@@ -261,8 +262,18 @@ function updateReponses() {
 window.addEventListener('beforeunload', function(e) {
   if (!form.classList.contains('submitted')) {
     e.preventDefault();
-    e.returnValue = '';
+    e.returnValue = '⚠️ Tu es sur le point de quitter l\'examen. Cela sera considéré comme un abandon et entraînera une pénalité de 100 XP ainsi que la réinitialisation des exercices.';
   }
+});
+
+document.querySelectorAll('a:not([href*="javascript"]):not([target="_blank"])').forEach(function(link) {
+  link.addEventListener('click', function(e) {
+    if (!form.classList.contains('submitted') && link.href && !link.href.includes('examen_final')) {
+      if (!confirm('⚠️ Tu es sur le point de quitter l\'examen. Cela sera considéré comme un abandon avec pénalité de 100 XP.\n\nConfirmer l\'abandon ?')) {
+        e.preventDefault();
+      }
+    }
+  });
 });
 
 document.getElementById('submit-exam').addEventListener('click', function() {

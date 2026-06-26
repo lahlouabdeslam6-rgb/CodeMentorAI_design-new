@@ -5,11 +5,153 @@ from django.contrib.auth.models import User
 from django.contrib.auth.hashers import make_password
 from mongoengine import DoesNotExist
 from .decorators import admin_required
-from .models import Profil, Formation, Cours, Exercice, Progression, Resolution, Activite, PasswordChangeRequest
+from .models import Profil, Formation, Cours, Exercice, Progression, Resolution, Activite, PasswordChangeRequest, QuestionNiveau, Lesson, ScoreExercice, FormationProgress, NiveauMatiere
 
 
 def _slugify(nom):
     return nom.lower().replace(' ', '-').replace('#', '-sharp').replace('++', '-plus-plus').replace('+', '-plus').replace('.', '-').replace("'", '').replace('é', 'e').replace('è', 'e').replace('ê', 'e').replace('à', 'a').replace('ù', 'u').replace('ç', 'c')
+
+
+_QUESTIONS_NIVEAU = [
+    {
+        "question": "Qu'est-ce qu'une variable en programmation ?",
+        "options": ["Un espace mémoire pour stocker une valeur", "Un type de boucle", "Une fonction mathématique", "Un commentaire"],
+        "reponse_correcte": 0,
+        "difficulte": "facile",
+    },
+    {
+        "question": "À quoi sert une condition {lang} ?",
+        "options": ["Exécuter du code selon une condition", "Créer une boucle infinie", "Déclarer une constante", "Importer un module"],
+        "reponse_correcte": 0,
+        "difficulte": "facile",
+    },
+    {
+        "question": "Que signifie l'opérateur == en programmation ?",
+        "options": ["Affectation d'une valeur", "Comparaison d'égalité", "Incrémentation", "Négation logique"],
+        "reponse_correcte": 1,
+        "difficulte": "facile",
+    },
+    {
+        "question": "Qu'est-ce qu'une fonction en programmation ?",
+        "options": ["Un bloc de code réutilisable", "Un type de donnée primitif", "Une variable globale", "Un fichier source"],
+        "reponse_correcte": 0,
+        "difficulte": "facile",
+    },
+    {
+        "question": "Qu'est-ce qu'une boucle for ?",
+        "options": ["Itérer sur une séquence d'éléments", "Déclarer une constante", "Créer une classe", "Gérer une exception"],
+        "reponse_correcte": 0,
+        "difficulte": "facile",
+    },
+    {
+        "question": "Qu'est-ce qu'un tableau (array) ?",
+        "options": ["Une collection ordonnée d'éléments", "Un type de boucle", "Une fonction prédéfinie", "Un fichier de configuration"],
+        "reponse_correcte": 0,
+        "difficulte": "facile",
+    },
+    {
+        "question": "Que fait l'opérateur % (modulo) ?",
+        "options": ["La division entière", "Le reste de la division", "La multiplication", "Le pourcentage"],
+        "reponse_correcte": 1,
+        "difficulte": "moyen",
+    },
+    {
+        "question": "Qu'est-ce qu'une boucle while ?",
+        "options": ["Répéter tant qu'une condition est vraie", "Déclarer une variable locale", "Créer un dictionnaire", "Définir une interface"],
+        "reponse_correcte": 0,
+        "difficulte": "facile",
+    },
+    {
+        "question": "Quelle est la différence entre = et == ?",
+        "options": ["= affecte une valeur, == compare deux valeurs", "= compare, == affecte", "C'est la même chose", "= est pour les nombres, == pour les chaînes"],
+        "reponse_correcte": 0,
+        "difficulte": "facile",
+    },
+    {
+        "question": "Qu'est-ce qu'une chaîne de caractères (string) ?",
+        "options": ["Une séquence de caractères", "Un nombre à virgule flottante", "Un type de boucle", "Une instruction conditionnelle"],
+        "reponse_correcte": 0,
+        "difficulte": "facile",
+    },
+    {
+        "question": "Qu'est-ce qu'un commentaire en programmation ?",
+        "options": ["Texte ignoré par le compilateur ou l'interpréteur", "Une instruction exécutable", "Un type de variable", "Une erreur de syntaxe"],
+        "reponse_correcte": 0,
+        "difficulte": "facile",
+    },
+    {
+        "question": "Que signifie 'débuguer' (debug) un programme ?",
+        "options": ["Trouver et corriger des erreurs", "Écrire du code plus rapidement", "Compiler un programme", "Installer une dépendance"],
+        "reponse_correcte": 0,
+        "difficulte": "facile",
+    },
+    {
+        "question": "Qu'est-ce qu'une classe en programmation orientée objet ?",
+        "options": ["Un modèle pour créer des objets", "Un type de boucle", "Une fonction anonyme", "Un fichier source"],
+        "reponse_correcte": 0,
+        "difficulte": "moyen",
+    },
+    {
+        "question": "À quoi servent les paramètres d'une fonction ?",
+        "options": ["Passer des données à la fonction", "Définir le type de retour", "Nommer la fonction", "Importer des modules externes"],
+        "reponse_correcte": 0,
+        "difficulte": "moyen",
+    },
+    {
+        "question": "Qu'est-ce qu'une instruction else rattachée à un if ?",
+        "options": ["Le bloc exécuté quand la condition if est fausse", "Toujours exécuté quoi qu'il arrive", "Une boucle conditionnelle", "Un type de variable booléenne"],
+        "reponse_correcte": 0,
+        "difficulte": "facile",
+    },
+    {
+        "question": "Que signifie l'incrémentation i++ ?",
+        "options": ["Augmenter i de 1", "Diminuer i de 1", "Multiplier i par 2", "Réinitialiser i à zéro"],
+        "reponse_correcte": 0,
+        "difficulte": "facile",
+    },
+    {
+        "question": "Qu'est-ce qu'une exception en programmation ?",
+        "options": ["Une erreur survenant pendant l'exécution", "Un type de boucle", "Une variable déclarée avec var", "Un fichier de log"],
+        "reponse_correcte": 0,
+        "difficulte": "moyen",
+    },
+    {
+        "question": "Qu'est-ce qu'un booléen (boolean) ?",
+        "options": ["Un type qui peut être vrai ou faux", "Un nombre entier", "Une chaîne de caractères", "Un tableau d'éléments"],
+        "reponse_correcte": 0,
+        "difficulte": "facile",
+    },
+    {
+        "question": "Que fait une instruction return dans une fonction ?",
+        "options": ["Renvoie une valeur et termine la fonction", "Continue la boucle suivante", "Déclare une variable", "Affiche un message"],
+        "reponse_correcte": 0,
+        "difficulte": "moyen",
+    },
+    {
+        "question": "Qu'est-ce qu'un dictionnaire (objet / map) ?",
+        "options": ["Une collection de paires clé-valeur", "Un fichier contenant des définitions", "Un type de boucle", "Un commentaire multiligne"],
+        "reponse_correcte": 0,
+        "difficulte": "moyen",
+    },
+]
+
+
+def _generer_questions_niveau(formation_nom, nombre=10):
+    """Auto-génère des questions de niveau pour une formation."""
+    questions_existantes = QuestionNiveau.objects(formation_nom=formation_nom).count()
+    if questions_existantes >= nombre:
+        return
+
+    pool = random.sample(_QUESTIONS_NIVEAU, min(nombre, len(_QUESTIONS_NIVEAU)))
+    for q_data in pool:
+        q_text = q_data["question"].replace("{lang}", formation_nom.split()[0] if formation_nom else "programmation")
+        QuestionNiveau(
+            formation_nom=formation_nom,
+            question=q_text,
+            options=q_data["options"],
+            reponse_correcte=q_data["reponse_correcte"],
+            difficulte=q_data["difficulte"],
+        ).save()
 
 
 def _assurer_formation(specialite, professor_id=None):
@@ -27,6 +169,7 @@ def _assurer_formation(specialite, professor_id=None):
             professor_id=professor_id or 0,
             ordre=Formation.objects.count() + 1,
         ).save()
+        _generer_questions_niveau(specialite)
     return formation
 
 
@@ -34,7 +177,6 @@ def _assurer_formation(specialite, professor_id=None):
 def admin_dashboard(request):
     total_students = Profil.objects(role='student').count()
     total_professors = Profil.objects(role='professor').count()
-    total_formations = Formation.objects.count()
     valid_cours = Cours.objects(professor_id__ne=0)
     total_courses = valid_cours.count()
     valid_ids = [c.id for c in valid_cours]
@@ -68,7 +210,6 @@ def admin_dashboard(request):
     return render(request, 'admin/dashboard.html', {
         'total_etudiants': total_students,
         'total_professeurs': total_professors,
-        'total_formations': total_formations,
         'total_cours': total_courses,
         'total_exercices': total_exercises,
         'utilisateurs_actifs': total_active,

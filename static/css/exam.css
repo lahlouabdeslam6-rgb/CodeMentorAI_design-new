@@ -1,0 +1,115 @@
+/* ========================================
+   CodeMentor AI — Exam Styles
+   ======================================== */
+
+.exam-card {
+  background: var(--bg3);
+  border: 1px solid var(--bd);
+  border-radius: var(--radius-lg);
+  padding: 1.25rem;
+}
+.exam-locked-card { border-top: 3px solid var(--mu2); }
+.exam-unlocked-card { border-top: 3px solid var(--gold); }
+.exam-done-card { border-top: 3px solid var(--gold); }
+.exam-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+.exam-label {
+  font-family: var(--fc);
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  color: var(--mu);
+}
+.exam-badge {
+  font-family: var(--fc);
+  font-size: 10px;
+  padding: 3px 10px;
+  border-radius: 20px;
+}
+.exam-badge-locked { background: rgba(255,255,255,0.06); color: var(--mu); }
+.exam-badge-unlocked { background: rgba(212,168,67,0.15); color: var(--gold); }
+.exam-badge-passed { background: rgba(46,204,113,0.15); color: #2ECC71; }
+.exam-badge-failed { background: rgba(231,76,60,0.15); color: #E74C3C; }
+.exam-progress-section { margin-bottom: 1rem; }
+.exam-score-display {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+.exam-score-number {
+  font-family: var(--fd);
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--wh);
+}
+.exam-score-target {
+  font-size: 12px;
+  color: var(--mu);
+  font-family: var(--fb);
+}
+.exam-progress-bar-track {
+  position: relative;
+  height: 8px;
+  background: var(--bg4);
+  border-radius: 4px;
+  overflow: visible;
+  margin-bottom: 6px;
+}
+.exam-progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--gold), var(--gold2));
+  border-radius: 4px;
+  transition: width 0.5s ease;
+}
+.exam-threshold-marker {
+  position: absolute;
+  right: 20%;
+  top: -3px;
+  width: 2px;
+  height: 14px;
+  background: var(--wh);
+  opacity: 0.4;
+}
+.exam-progress-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: var(--mu);
+  font-family: var(--fb);
+}
+.exam-cta-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--bd);
+}
+.exam-cta-text {
+  font-size: 12px;
+  color: var(--mu);
+  font-family: var(--fb);
+}
+.exam-unlocked-body { margin-bottom: 0; }
+.exam-unlocked-msg {
+  font-size: 13px;
+  color: var(--wh2);
+  margin-top: 6px;
+  line-height: 1.5;
+}
+.exam-done-body { margin-bottom: 0; }
+.exam-done-msg {
+  font-size: 13px;
+  color: var(--wh2);
+  margin-top: 6px;
+  line-height: 1.5;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .exam-card { padding: 1rem; }
+  .exam-score-number { font-size: 1.5rem; }
+}

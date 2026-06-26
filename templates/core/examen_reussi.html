@@ -1,0 +1,171 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Félicitations — {{ formation.nom }} — CodeMentor AI{% endblock %}
+{% block extra_css %}
+<style>
+.success-wrap {
+  max-width: 600px;
+  margin: 3rem auto;
+  text-align: center;
+}
+.confetti {
+  font-size: 4rem;
+  margin-bottom: 0.5rem;
+  animation: bounce 1s ease infinite;
+}
+@keyframes bounce {
+  0%,100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+.success-card {
+  background: var(--bg2);
+  border: 1px solid var(--bd);
+  border-radius: 16px;
+  padding: 2.5rem 2rem;
+  position: relative;
+  overflow: hidden;
+}
+.success-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #D4A843, #2ECC71, #D4A843);
+}
+.success-icon {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: rgba(46,204,113,0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.4rem;
+  margin: 0 auto 1.25rem;
+  border: 2px solid rgba(46,204,113,0.25);
+}
+.success-title {
+  font-family: var(--fd);
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #2ECC71;
+  margin-bottom: 0.5rem;
+}
+.success-sub {
+  color: var(--wh2);
+  font-size: 14px;
+  margin-bottom: 1.5rem;
+  line-height: 1.6;
+}
+.success-sub strong { color: var(--gold); }
+.stats-line {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  margin-bottom: 1.75rem;
+  flex-wrap: wrap;
+}
+.stat-pill {
+  background: var(--bg4);
+  border: 1px solid var(--bd);
+  border-radius: 10px;
+  padding: 0.75rem 1.25rem;
+  text-align: center;
+  min-width: 100px;
+}
+.stat-pill .num {
+  font-family: var(--fd);
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--gold);
+}
+.stat-pill .lab {
+  font-size: 10px;
+  color: var(--mu);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-top: 2px;
+}
+.cert-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(212,168,67,0.1);
+  border: 1px solid rgba(212,168,67,0.25);
+  border-radius: 40px;
+  padding: 0.5rem 1.25rem;
+  font-size: 13px;
+  color: var(--gold);
+  font-weight: 500;
+  margin-bottom: 1.75rem;
+}
+.actions {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.btn-cert {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 28px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.2s;
+}
+.btn-cert-gold {
+  background: var(--gold);
+  color: #080808;
+}
+.btn-cert-gold:hover { background: #F0C060; transform: translateY(-2px); }
+.btn-cert-ghost {
+  border: 1px solid var(--bd);
+  color: var(--wh2);
+}
+.btn-cert-ghost:hover { background: var(--bg4); border-color: var(--mu); transform: translateY(-2px); }
+@media (max-width:500px) {
+  .success-card { padding: 1.5rem 1rem; }
+  .stats-line { gap: 0.75rem; }
+  .stat-pill { min-width: 80px; padding: 0.5rem 0.75rem; }
+}
+</style>
+{% endblock %}
+{% block content %}
+<div class="page-content">
+  <div class="success-wrap">
+    <div class="confetti">🎉</div>
+    <div class="success-card">
+      <div class="success-icon">🏆</div>
+      <div class="success-title">Félicitations !</div>
+      <p class="success-sub">
+        Vous avez réussi l'examen de certification en <strong>{{ formation.nom }}</strong>.
+      </p>
+      <div class="cert-badge">🏆 Certification {{ formation.nom }}</div>
+      <div class="stats-line">
+        <div class="stat-pill">
+          <div class="num">{{ score }}%</div>
+          <div class="lab">Score</div>
+        </div>
+        <div class="stat-pill">
+          <div class="num">+100</div>
+          <div class="lab">XP {{ formation.nom }}</div>
+        </div>
+        <div class="stat-pill">
+          <div class="num">🏆</div>
+          <div class="lab">Certifié</div>
+        </div>
+      </div>
+      <p style="color:var(--mu);font-size:12px;margin-bottom:1.5rem">
+        ✨ Votre niveau et votre progression dans cette matière ont été mis à jour.
+      </p>
+      <div class="actions">
+        <a href="{% url 'certificat' slug=formation.slug %}" class="btn-cert btn-cert-gold">📄 Voir mon certificat</a>
+        <a href="{% url 'cours_detail' slug=formation.slug %}" class="btn-cert btn-cert-ghost">📚 Retour aux cours</a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

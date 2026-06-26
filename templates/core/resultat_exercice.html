@@ -27,7 +27,7 @@
       <div style="font-size:1.2rem;margin-bottom:4px">🎉 Félicitations !</div>
       <div style="font-size:13px;color:var(--wh2)">L'examen final est débloqué !</div>
     </div>
-    <a href="{% url 'examen_final' %}" class="btn btn-gold">Passer l'examen final →</a>
+    <a href="{% url 'examen_final' %}?formation={{ formation.slug }}" class="btn btn-gold">Passer l'examen final →</a>
     {% endif %}
 
     <div style="margin-top:1.5rem;display:flex;gap:8px;justify-content:center;flex-wrap:wrap">

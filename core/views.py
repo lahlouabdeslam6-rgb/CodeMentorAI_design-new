@@ -12,11 +12,12 @@ from mongoengine import DoesNotExist, NotUniqueError, Q
 from .models import (Profil, Formation, Cours, Lesson, Progression, Activite, Exercice,
                      Resolution, QuestionDiagnostic, SessionDiagnostic,
                      MessageChat, ScoreExercice, AccesExamen, QuestionExamen, ExamAttempt, ExamHistory,
-                     NiveauMatiere, PasswordChangeRequest, FormationProgress)
+                     NiveauMatiere, PasswordChangeRequest, FormationProgress, QuestionNiveau)
 from .decorators import student_required, get_role_dashboard
 from .utils import enregistrer_score
 from .tuteur_engine import generer_reponse
 import markdown
+import bleach
 
 
 class CustomLoginView(LoginView):
@@ -244,8 +245,18 @@ def dashboard(request):
         return render(request, 'core/approval_pending.html')
 
     formations_all = Formation.objects().order_by('ordre')
+
+    # Récupérer toutes les progressions en une seule requête
+    all_progressions = Progression.objects(user_id=uid)
+    progression_map = {}
+    for p in all_progressions:
+        if p.cours:
+            progression_map[str(p.cours.id)] = p
+
     total_cours = 0
     cours_termines = 0
+    roadmap = []
+
     for f in formations_all:
         prof_profil = Profil.objects(specialite__iexact=f.nom, role='professor').first()
         prof_id = prof_profil.user_id if prof_profil else f.professor_id
@@ -253,11 +264,26 @@ def dashboard(request):
             cours_list_f = Cours.objects(category=f.nom, professor_id=prof_id).order_by('ordre')
         else:
             cours_list_f = Cours.objects(category=f.nom, professor_id__ne=0).order_by('ordre')
+
         for c in cours_list_f:
             total_cours += 1
-            prog = Progression.objects(user_id=uid, cours=c).first()
+            prog = progression_map.get(str(c.id))
             if prog and prog.pourcentage == 100:
                 cours_termines += 1
+
+        # Roadmap dynamique : premiers cours de la formation
+        for idx, c in enumerate(cours_list_f[:7]):
+            statut = ''
+            prog = progression_map.get(str(c.id))
+            if prog and prog.pourcentage == 100:
+                statut = 'done'
+            elif prog and prog.pourcentage and prog.pourcentage > 0:
+                statut = 'current' if not any(r.get('statut') == 'current' for r in roadmap) else ''
+            else:
+                statut = ''
+            if not statut and idx == 0:
+                statut = 'current'
+            roadmap.append({'titre': c.titre, 'statut': statut, 'formation': f.nom})
 
     exercices_reussis = Resolution.objects(user_id=uid, resolu=True).count()
     total_exercices = Exercice.objects.count()
@@ -280,26 +306,6 @@ def dashboard(request):
             check -= timedelta(days=1)
     profil.serie_jours = streak
     profil.save()
-
-    roadmap = [
-        {'titre': 'Introduction JavaScript', 'statut': 'done'},
-        {'titre': 'Variables et types', 'statut': 'done'},
-        {'titre': 'Fonctions', 'statut': 'current' if cours_termines >= 2 else 'done' if cours_termines >= 1 else 'done'},
-        {'titre': 'Objets et tableaux', 'statut': 'current' if cours_termines == 2 else 'done' if cours_termines > 2 else ''},
-        {'titre': 'DOM et événements', 'statut': 'current' if cours_termines == 3 else ''},
-        {'titre': 'Asynchrone (Promises, async/await)', 'statut': ''},
-        {'titre': 'Projet final', 'statut': ''},
-    ]
-
-    found_current = False
-    for etape in roadmap:
-        if etape['statut'] == 'current':
-            found_current = True
-        elif not found_current and etape['statut'] == '':
-            etape['statut'] = 'current'
-            found_current = True
-
-    peut_passer_examen = cours_termines >= 3
 
     formations_progress = []
     for f in formations_all:
@@ -484,7 +490,7 @@ def lecon_detail(request, slug):
         lesson = lessons.first()
         lecon_ordre = lesson.ordre
 
-    content_html = md_lib.markdown(lesson.content, extensions=['fenced_code', 'codehilite', 'tables']) if lesson.content else ''
+    content_html = bleach.clean(md_lib.markdown(lesson.content, extensions=['fenced_code', 'codehilite', 'tables']), tags=['p', 'br', 'strong', 'em', 'b', 'i', 'u', 'a', 'pre', 'code', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'li', 'blockquote', 'table', 'thead', 'tbody', 'tr', 'th', 'td', 'hr', 'img', 'span', 'div', 'figure', 'figcaption'], attributes={'a': ['href', 'title', 'target', 'rel'], 'img': ['src', 'alt', 'title', 'class'], 'code': ['class'], 'span': ['class'], 'div': ['class'], 'td': ['style'], 'th': ['style']}) if lesson.content else ''
 
     prev_lesson = lessons.filter(ordre=lecon_ordre - 1).first() if lecon_ordre > 1 else None
     next_lesson = lessons.filter(ordre=lecon_ordre + 1).first()
@@ -621,8 +627,13 @@ def _obtenir_niveau_label(niveau):
 
 def _obtenir_niveaux_dashboard(uid):
     niveaux = []
-    for f in Formation.objects().order_by('ordre'):
-        nm = NiveauMatiere.objects(user_id=uid, formation_nom=f.nom).first()
+    formations = Formation.objects().order_by('ordre')
+    formation_names = [f.nom for f in formations]
+    nm_map = {}
+    for nm in NiveauMatiere.objects(user_id=uid, formation_nom__in=formation_names):
+        nm_map[nm.formation_nom] = nm
+    for f in formations:
+        nm = nm_map.get(f.nom)
         niveaux.append({
             'nom': f.nom,
             'emoji': f.emoji,
@@ -919,7 +930,7 @@ def tuteur(request):
 
     for msg in historique:
         if msg.role == 'ai':
-            msg.contenu_html = markdown.markdown(msg.contenu, extensions=['fenced_code', 'codehilite'])
+            msg.contenu_html = bleach.clean(markdown.markdown(msg.contenu, extensions=['fenced_code', 'codehilite']), tags=['p', 'br', 'strong', 'em', 'b', 'i', 'u', 'a', 'pre', 'code', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'li', 'blockquote', 'table', 'thead', 'tbody', 'tr', 'th', 'td', 'hr', 'img', 'span', 'div', 'figure', 'figcaption'], attributes={'a': ['href', 'title', 'target', 'rel'], 'img': ['src', 'alt', 'title', 'class'], 'code': ['class'], 'span': ['class'], 'div': ['class'], 'td': ['style'], 'th': ['style']})
 
     return render(request, 'core/tuteur.html', {
         'historique': historique,
@@ -981,14 +992,16 @@ def test_niveau_matiere(request, slug):
         return redirect('formation_detail', slug=slug)
 
     if request.method == 'POST':
-        reponses_str = request.POST.get('reponses', '')
-        reponses_list = reponses_str.split(',') if reponses_str else []
-        questions = QuestionExamen.objects(formation_nom=formation.nom)
+        nm = NiveauMatiere.objects(user_id=uid, formation_nom=formation.nom).first()
+        questions = list(QuestionNiveau.objects(formation_nom=formation.nom))
+        random.shuffle(questions)
+        questions = questions[:10]
         total = len(questions)
         bonnes = 0
-        for i, q in enumerate(questions):
-            if i < len(reponses_list) and reponses_list[i].isdigit():
-                if int(reponses_list[i]) == q.reponse_correcte:
+        for q in questions:
+            val = request.POST.get(f'q_{q.id}')
+            if val is not None and val.isdigit():
+                if int(val) == q.reponse_correcte:
                     bonnes += 1
 
         pct = int((bonnes / max(total, 1)) * 100)
@@ -1023,7 +1036,7 @@ def test_niveau_matiere(request, slug):
         )
         return redirect('formation_detail', slug=slug)
 
-    questions = list(QuestionExamen.objects(formation_nom=formation.nom))
+    questions = list(QuestionNiveau.objects(formation_nom=formation.nom))
     random.shuffle(questions)
     questions = questions[:10]
 
@@ -1137,10 +1150,15 @@ def examen_final(request):
 
             reponses_str = request.POST.get('reponses', '')
             reponses_list = reponses_str.split(',') if reponses_str else []
-            all_questions = list(QuestionExamen.objects(formation_nom=f_nom))
-            total_q = len(all_questions)
+            qids = attempt.reponses.split(',') if attempt.reponses else []
+            questions_ordered = []
+            for qid in qids:
+                q = QuestionExamen.objects(id=qid).first()
+                if q:
+                    questions_ordered.append(q)
+            total_q = len(questions_ordered)
             bonnes = 0
-            for i, q in enumerate(all_questions):
+            for i, q in enumerate(questions_ordered):
                 if i < len(reponses_list) and reponses_list[i].isdigit():
                     choix = int(reponses_list[i])
                     if choix == q.reponse_correcte:
@@ -1174,7 +1192,7 @@ def examen_final(request):
                     fp.xp += 100
                     fp.exam_passed = True
                     fp.save()
-                messages.success(request, f"Felicitations ! Tu as reussi l'examen {f_nom} avec {pct}% ! +100 XP")
+                return redirect(f'{reverse("examen_reussi", kwargs={"slug": formation_slug})}')
             else:
                 acces.examen_passe = True
                 acces.examen_reussi = False
@@ -1344,4 +1362,54 @@ def profile_edit(request):
         'profil': profil,
         'formations_progress': formations_progress,
         'total_xp': total_xp,
+    })
+
+
+@login_required
+@student_required
+def examen_reussi(request, slug):
+    uid = request.user.id
+    formation = Formation.objects(slug=slug).first()
+    if not formation:
+        messages.error(request, "Formation introuvable.")
+        return redirect('examens_list')
+
+    acces = AccesExamen.objects(user_id=uid, formation_nom=formation.nom).first()
+    if not acces or not acces.examen_reussi:
+        messages.warning(request, "Tu n'as pas encore réussi cet examen.")
+        return redirect('examen_final', formation=slug)
+
+    fp = FormationProgress.objects(user_id=uid, formation_nom=formation.nom).first()
+
+    return render(request, 'core/examen_reussi.html', {
+        'formation': formation,
+        'acces': acces,
+        'fp': fp,
+        'score': int(acces.score_examen),
+    })
+
+
+@login_required
+@student_required
+def certificat(request, slug):
+    uid = request.user.id
+    formation = Formation.objects(slug=slug).first()
+    if not formation:
+        messages.error(request, "Formation introuvable.")
+        return redirect('examens_list')
+
+    acces = AccesExamen.objects(user_id=uid, formation_nom=formation.nom).first()
+    if not acces or not acces.examen_reussi:
+        messages.warning(request, "Tu n'as pas encore obtenu cette certification.")
+        return redirect('examens_list')
+
+    profil = Profil.objects(user_id=uid).first()
+    fp = FormationProgress.objects(user_id=uid, formation_nom=formation.nom).first()
+
+    return render(request, 'core/certificat.html', {
+        'formation': formation,
+        'acces': acces,
+        'fp': fp,
+        'profil': profil,
+        'score': int(acces.score_examen),
     })

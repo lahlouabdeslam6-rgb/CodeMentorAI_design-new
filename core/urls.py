@@ -24,6 +24,8 @@ urlpatterns = [
     path('examens/', views.examens_list, name='examens_list'),
     path('examen/', views.examen_final, name='examen_final'),
     path('examen/resultat/', views.examen_final, name='examen_resultat'),
+    path('examen/reussi/<slug:slug>/', views.examen_reussi, name='examen_reussi'),
+    path('certificat/<slug:slug>/', views.certificat, name='certificat'),
     path('contact-admin/', views.contact_admin, name='contact_admin'),
     path('profile/edit/', views.profile_edit, name='profile_edit'),
 

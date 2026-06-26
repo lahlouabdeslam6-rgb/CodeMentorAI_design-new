@@ -21,7 +21,7 @@
         </div>
         {% for opt in q.options %}
         <label style="display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:4px;cursor:pointer;font-size:13px;color:var(--wh2);transition:background 0.15s" onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background='transparent'">
-          <input type="radio" name="q{{ forloop.parentloop.counter0 }}" value="{{ forloop.counter0 }}" style="accent-color:var(--gold)" required>
+          <input type="radio" name="q_{{ q.id }}" value="{{ forloop.counter0 }}" style="accent-color:var(--gold)" required>
           <span>{{ opt }}</span>
         </label>
         {% endfor %}

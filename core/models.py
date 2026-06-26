@@ -17,7 +17,7 @@ class Profil(Document):
     niveau_tested = BooleanField(default=False)
     specialite = StringField(default='')
 
-    meta = {'collection': 'profils'}
+    meta = {'collection': 'profils', 'indexes': ['user_id', 'specialite', 'role']}
 
     def get_niveau_label(self):
         return dict(Profil.niveau_choices).get(self.niveau, self.niveau)
@@ -70,10 +70,10 @@ class Cours(Document):
     niveau = StringField(choices=['debutant', 'intermediaire', 'avance'])
     ordre = IntField(default=0)
     professor_id = IntField(default=0)
-    category = StringField(default='JavaScript')
+    category = StringField(default='')
     chapitres = ListField(StringField())
 
-    meta = {'collection': 'cours', 'ordering': ['ordre']}
+    meta = {'collection': 'cours', 'ordering': ['ordre'], 'indexes': ['category', 'professor_id', 'slug']}
 
     def get_niveau_label(self):
         return dict(Cours.niveau_choices).get(self.niveau, self.niveau)
@@ -94,7 +94,7 @@ class Progression(Document):
     pourcentage = IntField(default=0)
     lecons_accessed = ListField(IntField(), default=[])
 
-    meta = {'collection': 'progressions'}
+    meta = {'collection': 'progressions', 'indexes': ['user_id', 'cours']}
 
 
 class Activite(Document):
@@ -103,7 +103,7 @@ class Activite(Document):
     description = StringField(max_length=300)
     date = DateTimeField(default=datetime.now)
 
-    meta = {'collection': 'activites', 'ordering': ['-date']}
+    meta = {'collection': 'activites', 'ordering': ['-date'], 'indexes': ['user_id', 'type']}
 
 
 class Exercice(Document):
@@ -117,7 +117,7 @@ class Exercice(Document):
     correction = StringField(default='')
     lesson_nom = StringField(default='')
 
-    meta = {'collection': 'exercices'}
+    meta = {'collection': 'exercices', 'indexes': ['cours', 'lesson', 'lesson_nom']}
 
     def get_difficulte_label(self):
         return dict(Exercice.difficulte_choices).get(self.difficulte, self.difficulte)
@@ -136,7 +136,7 @@ class Resolution(Document):
     note = IntField(default=0)
     date = DateTimeField(default=datetime.now)
 
-    meta = {'collection': 'resolutions'}
+    meta = {'collection': 'resolutions', 'indexes': ['user_id', 'exercice']}
 
 
 class OptionDiag(EmbeddedDocument):
@@ -181,7 +181,7 @@ class ScoreExercice(Document):
     date_completion = DateTimeField(default=datetime.now)
     tentatives = IntField(default=1)
 
-    meta = {'collection': 'scores_exercices'}
+    meta = {'collection': 'scores_exercices', 'indexes': ['user_id', 'exercice']}
 
 
 class QuestionExamen(Document):
@@ -190,14 +190,14 @@ class QuestionExamen(Document):
     reponse_correcte = IntField(required=True)
     difficulte = StringField(choices=['debutant', 'intermediaire', 'avance'])
     categorie = StringField(default='Général')
-    formation_nom = StringField(default='JavaScript')
+    formation_nom = StringField(default='')
 
-    meta = {'collection': 'questions_examen'}
+    meta = {'collection': 'questions_examen', 'indexes': ['categorie', 'formation_nom', 'difficulte']}
 
 
 class AccesExamen(Document):
     user_id = IntField(required=True)
-    formation_nom = StringField(default='JavaScript')
+    formation_nom = StringField(default='')
     debloque = BooleanField(default=False)
     date_deblocage = DateTimeField()
     score_global = FloatField(default=0.0)
@@ -206,12 +206,12 @@ class AccesExamen(Document):
     date_examen = DateTimeField()
     score_examen = FloatField(default=0.0)
 
-    meta = {'collection': 'acces_examens'}
+    meta = {'collection': 'acces_examens', 'indexes': ['user_id', 'formation_nom']}
 
 
 class ExamAttempt(Document):
     user_id = IntField(required=True)
-    formation_nom = StringField(default='JavaScript')
+    formation_nom = StringField(default='')
     start_time = DateTimeField(default=datetime.now)
     end_time = DateTimeField()
     duration_minutes = IntField(default=60)
@@ -221,12 +221,12 @@ class ExamAttempt(Document):
     score = IntField(default=0)
     total_questions = IntField(default=0)
 
-    meta = {'collection': 'exam_attempts'}
+    meta = {'collection': 'exam_attempts', 'indexes': ['user_id', 'formation_nom']}
 
 
 class ExamHistory(Document):
     user_id = IntField(required=True)
-    formation_nom = StringField(default='JavaScript')
+    formation_nom = StringField(default='')
     date = DateTimeField(default=datetime.now)
     score_examen = FloatField(default=0.0)
     reussi = BooleanField(default=False)
@@ -234,7 +234,7 @@ class ExamHistory(Document):
     exercices_reinitialises = IntField(default=0)
     type_echec = StringField(default='note_insuffisante', choices=['note_insuffisante', 'temps_ecoule', 'abandon'])
 
-    meta = {'collection': 'exam_history'}
+    meta = {'collection': 'exam_history', 'indexes': ['user_id', 'formation_nom']}
 
 
 class NiveauMatiere(Document):
@@ -257,7 +257,7 @@ class FormationProgress(Document):
     exam_passed = BooleanField(default=False)
     level = StringField(choices=['debutant', 'intermediaire', 'avance'], default='debutant')
 
-    meta = {'collection': 'formations_progress'}
+    meta = {'collection': 'formations_progress', 'indexes': ['user_id', 'formation_nom']}
 
     def get_level_display(self):
         return dict(FormationProgress.level_choices).get(self.level, self.level)
@@ -298,3 +298,14 @@ class PasswordChangeRequest(Document):
         ('accepted', 'Acceptée'),
         ('rejected', 'Refusée'),
     ]
+
+
+class QuestionNiveau(Document):
+    """Questions de test de niveau par matière (auto-générées à la création de la formation)."""
+    formation_nom = StringField(required=True)
+    question = StringField(required=True)
+    options = ListField(StringField())
+    reponse_correcte = IntField(required=True)
+    difficulte = StringField(choices=['facile', 'moyen', 'difficile'], default='facile')
+
+    meta = {'collection': 'questions_niveau'}

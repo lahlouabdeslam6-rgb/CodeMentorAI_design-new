@@ -4,7 +4,7 @@
 <style>
 .stats-grid {
   display: grid;
-  grid-template-columns: repeat(6, 1fr);
+  grid-template-columns: repeat(5, 1fr);
   gap: 1px;
   background: var(--bd);
   border: 1px solid var(--bd);
@@ -107,11 +107,6 @@
       <div class="stat-label">Exercices</div>
       <div class="stat-number stat-gold">{{ total_exercices }}</div>
       <div class=stat-desc><span>💻</span> disponibles</div>
-    </div>
-    <div class="stat-cell" style="border-top-color:rgba(212,168,67,0.3)">
-      <div class="stat-label">Formations</div>
-      <div class="stat-number stat-gold">{{ total_formations }}</div>
-      <div class=stat-desc><span>📚</span> au catalogue</div>
     </div>
     <div class="stat-cell stat-cell-actif">
       <div class="stat-label">Actifs</div>
