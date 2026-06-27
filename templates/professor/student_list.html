@@ -25,6 +25,7 @@
           <th>Niveau</th>
           <th>XP ({{ students.0.formation_nom|default:'Matière' }})</th>
           <th>Cours suivis</th>
+          <th>Certification</th>
           <th>Statut</th>
         </tr>
       </thead>
@@ -44,6 +45,13 @@
           <td><span style="font-family:var(--fc);color:var(--gold)">{{ s.xp_formation }} XP</span></td>
           <td><span class="badge badge-gold">{{ s.course_count }}</span></td>
           <td>
+            {% if s.certifie %}
+            <span style="display:inline-flex;align-items:center;gap:4px;font-size:11px;color:#2ECC71;font-weight:600">✅ {{ s.cert_date|date:"d/m/Y" }}</span>
+            {% else %}
+            <span style="font-size:11px;color:var(--mu)">—</span>
+            {% endif %}
+          </td>
+          <td>
             {% if s.is_active %}
             <span class="status-badge status-approved">Actif</span>
             {% else %}
@@ -52,7 +60,7 @@
           </td>
         </tr>
         {% empty %}
-        <tr><td colspan="5" style="text-align:center;color:var(--mu);padding:2rem">Aucun étudiant trouvé.</td></tr>
+        <tr><td colspan="6" style="text-align:center;color:var(--mu);padding:2rem">Aucun étudiant trouvé.</td></tr>
         {% endfor %}
       </tbody>
     </table>

@@ -1,0 +1,371 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Mes Certificats — CodeMentor AI{% endblock %}
+{% block extra_css %}
+<style>
+.cert-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 700px;
+  margin: 0 auto;
+}
+.cert-card {
+  display: flex;
+  align-items: center;
+  background: var(--bg2);
+  border: 1px solid var(--bd);
+  border-radius: 12px;
+  padding: 1.25rem 1.5rem;
+  transition: border-color 0.2s, transform 0.15s;
+}
+.cert-card:hover {
+  border-color: var(--gold);
+  transform: translateY(-2px);
+}
+.cert-emoji {
+  font-size: 2.2rem;
+  flex-shrink: 0;
+  width: 60px;
+  text-align: center;
+}
+.cert-info {
+  flex: 1;
+  min-width: 0;
+}
+.cert-name {
+  font-family: var(--fd);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--wh);
+  margin-bottom: 2px;
+}
+.cert-date {
+  font-size: 12px;
+  color: var(--mu);
+  font-family: var(--fc);
+}
+.cert-score {
+  font-size: 12px;
+  color: var(--gold);
+  font-weight: 500;
+  margin-top: 2px;
+}
+.cert-action {
+  flex-shrink: 0;
+}
+.cert-action button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--gold);
+  color: #080808;
+  padding: 8px 18px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  font-family: var(--fb);
+  transition: background 0.2s;
+}
+.cert-action button:hover { background: #F0C060; }
+.empty-state {
+  text-align: center;
+  padding: 3rem 1rem;
+  max-width: 500px;
+  margin: 0 auto;
+}
+.empty-state .icon { font-size: 3rem; margin-bottom: 1rem; }
+.empty-state h2 { font-family: var(--fd); font-size: 1.4rem; color: var(--wh); margin-bottom: 0.5rem; }
+.empty-state p { font-size: 13px; color: var(--mu); line-height: 1.6; }
+
+/* Modal overlay */
+.cert-modal {
+  display: none;
+  position: fixed;
+  z-index: 1000;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  backdrop-filter: blur(4px);
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+.cert-modal.open { display: flex; }
+.cert-modal-content {
+  background: #0d0d0d;
+  border: 1px solid rgba(212,168,67,0.3);
+  border-radius: 20px;
+  max-width: 640px;
+  width: 100%;
+  position: relative;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  animation: modalIn 0.25s ease;
+}
+@keyframes modalIn {
+  from { opacity: 0; transform: scale(0.95) translateY(10px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+.cert-modal-inner {
+  padding: 2.5rem 2rem;
+}
+.cert-modal-seal {
+  width: 64px; height: 64px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(212,168,67,0.15), transparent);
+  border: 2px solid var(--gold);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  margin: 0 auto 1rem;
+}
+.cert-modal-title {
+  font-family: var(--fd);
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--gold);
+  text-align: center;
+  margin-bottom: 0.25rem;
+}
+.cert-modal-sub {
+  font-size: 10px;
+  color: var(--mu);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  text-align: center;
+  font-family: var(--fc);
+  margin-bottom: 1.5rem;
+}
+.cert-modal-body {
+  text-align: center;
+}
+.cert-modal-body p {
+  font-size: 12px;
+  color: var(--wh2);
+  line-height: 1.8;
+  margin-bottom: 0.5rem;
+}
+.cert-modal-student {
+  font-family: var(--fd);
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--wh);
+  margin-bottom: 0.5rem;
+}
+.cert-modal-formation {
+  display: inline-block;
+  background: rgba(212,168,67,0.1);
+  border: 1px solid rgba(212,168,67,0.2);
+  border-radius: 40px;
+  padding: 0.3rem 1.25rem;
+  font-size: 13px;
+  color: var(--gold);
+  font-weight: 500;
+  margin-bottom: 1rem;
+}
+.cert-modal-details {
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  font-size: 12px;
+  color: var(--mu);
+  margin-bottom: 1.25rem;
+}
+.cert-modal-details span strong { color: var(--wh2); }
+.cert-modal-sig {
+  text-align: center;
+  padding-top: 1rem;
+  border-top: 1px solid var(--bd);
+  margin-bottom: 1.25rem;
+}
+.cert-modal-sig p {
+  font-size: 10px;
+  color: var(--mu);
+  font-family: var(--fc);
+  letter-spacing: 0.05em;
+  margin: 0;
+}
+.cert-modal-sig .sig-line {
+  font-size: 12px;
+  color: var(--gold);
+  font-weight: 500;
+  font-family: var(--fd);
+}
+.cert-modal-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.cert-modal-actions button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 22px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  font-family: var(--fb);
+  transition: all 0.2s;
+}
+.btn-modal-print {
+  background: var(--gold);
+  color: #080808;
+}
+.btn-modal-print:hover { background: #F0C060; }
+.btn-modal-dl {
+  background: var(--bg4);
+  color: var(--wh2);
+  border: 1px solid var(--bd) !important;
+}
+.btn-modal-dl:hover { background: var(--bg3); }
+.btn-modal-close {
+  background: transparent;
+  color: var(--mu);
+  border: 1px solid var(--bd) !important;
+}
+.btn-modal-close:hover { background: var(--bg4); color: var(--wh2); }
+.modal-print-area { display: none; }
+@media print {
+  body * { visibility: hidden; }
+  .modal-print-area, .modal-print-area * { visibility: visible; }
+  .modal-print-area { display: block !important; position: absolute; left: 0; top: 0; width: 100%; }
+  .cert-modal { display: none !important; }
+}
+</style>
+{% endblock %}
+{% block content %}
+<div class="page-content">
+  <div class="dash-header">
+    <div>
+      <div class="greet-name">🏅 Mes certificats</div>
+      <div class="greet-sub">{{ cert_list|length }} certificat{{ cert_list|length|pluralize }} obtenu{{ cert_list|length|pluralize }}</div>
+    </div>
+  </div>
+
+  <div class="cert-grid">
+    {% for item in cert_list %}
+    <div class="cert-card" data-formation="{{ item.certificat.formation_nom }}"
+         data-emoji="{{ item.formation.emoji|default:'📜' }}"
+         data-score="{{ item.certificat.score }}"
+         data-date="{{ item.certificat.obtained_at|date:'d/m/Y' }}"
+         data-student="{{ profil.fullname|default:profil.username }}">
+      <div class="cert-emoji">{{ item.formation.emoji|default:'📜' }}</div>
+      <div class="cert-info">
+        <div class="cert-name">{{ item.certificat.formation_nom }}</div>
+        <div class="cert-date">📅 Obtenu le : {{ item.certificat.obtained_at|date:"d/m/Y" }}</div>
+        <div class="cert-score">🏆 Score : {{ item.certificat.score }}%</div>
+      </div>
+      <div class="cert-action">
+        <button onclick="ouvrirCertificat(this)">📄 Voir le certificat</button>
+      </div>
+    </div>
+    {% empty %}
+    <div class="empty-state">
+      <div class="icon">🎓</div>
+      <h2>Pas encore de certificat</h2>
+      <p>Tu n'as pas encore obtenu de certification. Passe les examens de chaque matière pour obtenir ton certificat.</p>
+      <a href="{% url 'examens_list' %}" class="btn btn-gold" style="display:inline-flex;margin-top:1rem">📋 Voir les examens</a>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+
+<!-- Modal certificat -->
+<div class="cert-modal" id="certModal">
+  <div class="cert-modal-content" id="certModalContent">
+    <div class="cert-modal-inner">
+      <div class="cert-modal-seal" id="modalSeal">🏆</div>
+      <div class="cert-modal-title">CERTIFICAT DE RÉUSSITE</div>
+      <div class="cert-modal-sub">CodeMentor AI — Plateforme d'apprentissage</div>
+      <div class="cert-modal-body">
+        <p>Ce certificat est décerné à</p>
+        <div class="cert-modal-student" id="modalStudent"></div>
+        <p>pour avoir réussi avec succès l'examen de certification</p>
+        <div class="cert-modal-formation" id="modalFormation"></div>
+        <div class="cert-modal-details" id="modalDetails"></div>
+      </div>
+      <div class="cert-modal-sig">
+        <p>Ce certificat est délivré par</p>
+        <div class="sig-line">CodeMentor AI</div>
+        <p>Plateforme intelligente d'apprentissage du développement informatique</p>
+      </div>
+      <div class="cert-modal-actions">
+        <button onclick="imprimerCertificat()" class="btn-modal-print">🖨️ Imprimer le certificat</button>
+        <button onclick="telechargerPDF()" class="btn-modal-dl">⬇️ Télécharger (PDF)</button>
+        <button onclick="fermerCertificat()" class="btn-modal-close">❌ Fermer</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Zone cachée pour l'impression -->
+<div class="modal-print-area" id="printArea"></div>
+{% endblock %}
+{% block extra_js %}
+<script>
+var currentData = null;
+
+function ouvrirCertificat(btn) {
+  var card = btn.closest('.cert-card');
+  currentData = {
+    student: card.dataset.student,
+    formation: card.dataset.formation,
+    emoji: card.dataset.emoji,
+    score: card.dataset.score,
+    date: card.dataset.date
+  };
+  document.getElementById('modalStudent').textContent = currentData.student;
+  document.getElementById('modalFormation').innerHTML = currentData.emoji + ' Certification ' + currentData.formation;
+  document.getElementById('modalDetails').innerHTML =
+    '<span>Score : <strong>' + currentData.score + '%</strong></span>' +
+    '<span>Date : <strong>' + currentData.date + '</strong></span>';
+  document.getElementById('certModal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function fermerCertificat() {
+  document.getElementById('certModal').classList.remove('open');
+  document.body.style.overflow = '';
+  currentData = null;
+}
+
+function imprimerCertificat() {
+  if (!currentData) return;
+  var pa = document.getElementById('printArea');
+  pa.innerHTML =
+    '<div style="text-align:center;padding:2rem;font-family:sans-serif">' +
+    '<div style="font-size:2.5rem;margin-bottom:1rem">🏆</div>' +
+    '<h1 style="font-size:1.6rem;color:#D4A843;margin-bottom:0.25rem">CERTIFICAT DE RÉUSSITE</h1>' +
+    '<p style="font-size:10px;color:#999;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:1.5rem">CodeMentor AI — Plateforme d\'apprentissage</p>' +
+    '<p style="font-size:13px;margin-bottom:0.5rem">Ce certificat est décerné à</p>' +
+    '<h2 style="font-size:1.8rem;font-weight:700;margin-bottom:0.5rem">' + currentData.student + '</h2>' +
+    '<p style="font-size:13px;margin-bottom:0.5rem">pour avoir réussi avec succès l\'examen de certification</p>' +
+    '<div style="display:inline-block;border:1px solid #D4A843;border-radius:40px;padding:0.3rem 1.25rem;font-size:13px;color:#D4A843;margin-bottom:1rem">' + currentData.emoji + ' Certification ' + currentData.formation + '</div>' +
+    '<div style="font-size:12px;color:#666;margin-bottom:1.5rem">Score : <strong>' + currentData.score + '%</strong> &nbsp;·&nbsp; Date : <strong>' + currentData.date + '</strong></div>' +
+    '<div style="border-top:1px solid #ddd;padding-top:1rem;font-size:10px;color:#999">' +
+    '<p style="margin:0">Ce certificat est délivré par</p>' +
+    '<p style="font-size:12px;color:#D4A843;font-weight:500;margin:4px 0">CodeMentor AI</p>' +
+    '<p style="margin:0">Plateforme intelligente d\'apprentissage du développement informatique</p></div></div>';
+  window.print();
+  pa.innerHTML = '';
+}
+
+function telechargerPDF() {
+  imprimerCertificat();
+}
+
+document.getElementById('certModal').addEventListener('click', function(e) {
+  if (e.target === this) fermerCertificat();
+});
+
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') fermerCertificat();
+});
+</script>
+{% endblock %}

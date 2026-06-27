@@ -12,7 +12,8 @@ from mongoengine import DoesNotExist, NotUniqueError, Q
 from .models import (Profil, Formation, Cours, Lesson, Progression, Activite, Exercice,
                      Resolution, QuestionDiagnostic, SessionDiagnostic,
                      MessageChat, ScoreExercice, AccesExamen, QuestionExamen, ExamAttempt, ExamHistory,
-                     NiveauMatiere, PasswordChangeRequest, FormationProgress, QuestionNiveau)
+                     NiveauMatiere, PasswordChangeRequest, FormationProgress, QuestionNiveau,
+                     StudentCertificate)
 from .decorators import student_required, get_role_dashboard
 from .utils import enregistrer_score
 from .tuteur_engine import generer_reponse
@@ -1051,8 +1052,13 @@ def test_niveau_matiere(request, slug):
 def examens_list(request):
     uid = request.user.id
     formations = Formation.objects().order_by('ordre')
+    certified = set(
+        c.formation_nom for c in StudentCertificate.objects(user_id=uid)
+    )
     examens = []
     for f in formations:
+        if f.nom in certified:
+            continue
         cours_list = Cours.objects(category__iexact=f.nom, professor_id__ne=0)
         exos = Exercice.objects(cours__in=cours_list)
         exo_ids = [e.id for e in exos]
@@ -1067,6 +1073,7 @@ def examens_list(request):
         examen_passe = acces.examen_passe if acces else False
         examen_reussi = acces.examen_reussi if acces else False
         score_examen = acces.score_examen if acces else 0
+        date_examen = acces.date_examen if acces and acces.date_examen else None
 
         examens.append({
             'nom': f.nom,
@@ -1080,6 +1087,7 @@ def examens_list(request):
             'examen_passe': examen_passe,
             'examen_reussi': examen_reussi,
             'score_examen': score_examen,
+            'date_examen': date_examen,
         })
 
     return render(request, 'core/examens_list.html', {'examens': examens})
@@ -1132,6 +1140,8 @@ def examen_final(request):
         acces.save()
 
     if acces.examen_passe:
+        if acces.examen_reussi:
+            return redirect('examen_reussi', slug=formation_slug)
         return render(request, 'core/examen_resultat.html', {'acces': acces, 'formation': formation})
 
     demarrer = request.GET.get('start') == '1'
@@ -1192,6 +1202,14 @@ def examen_final(request):
                     fp.xp += 100
                     fp.exam_passed = True
                     fp.save()
+                StudentCertificate.objects(user_id=uid, formation_nom=f_nom).delete()
+                StudentCertificate(
+                    user_id=uid,
+                    formation_nom=f_nom,
+                    score=pct,
+                    obtained_at=now,
+                    exam_id=str(attempt.id),
+                ).save()
                 return redirect(f'{reverse("examen_reussi", kwargs={"slug": formation_slug})}')
             else:
                 acces.examen_passe = True
@@ -1412,4 +1430,23 @@ def certificat(request, slug):
         'fp': fp,
         'profil': profil,
         'score': int(acces.score_examen),
+    })
+
+
+@login_required
+@student_required
+def mes_certificats(request):
+    uid = request.user.id
+    profil = Profil.objects(user_id=uid).first()
+    certificats = StudentCertificate.objects(user_id=uid).order_by('-obtained_at')
+    cert_list = []
+    for c in certificats:
+        formation = Formation.objects(nom=c.formation_nom).first()
+        cert_list.append({
+            'certificat': c,
+            'formation': formation,
+        })
+    return render(request, 'core/mes_certificats.html', {
+        'cert_list': cert_list,
+        'profil': profil,
     })

@@ -106,6 +106,24 @@
   margin-top: 0.5rem;
 }
 .cert-details span strong { color: var(--wh2); }
+.cert-signature {
+  text-align: center;
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--bd);
+}
+.cert-signature p {
+  font-size: 11px;
+  color: var(--mu);
+  font-family: var(--fc);
+  letter-spacing: 0.05em;
+}
+.cert-signature .sig-line {
+  font-size: 13px;
+  color: var(--gold);
+  font-weight: 500;
+  font-family: var(--fd);
+}
 .cert-footer {
   display: flex;
   justify-content: center;
@@ -113,30 +131,32 @@
   flex-wrap: wrap;
   position: relative;
   z-index: 1;
-  padding-top: 1.5rem;
-  border-top: 1px solid var(--bd);
+  margin-top: 1.5rem;
 }
-.cert-footer a {
+.cert-footer button {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 10px 24px;
+  gap: 8px;
+  padding: 12px 28px;
   border-radius: 8px;
   font-size: 13px;
-  font-weight: 500;
-  text-decoration: none;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  font-family: var(--fb);
   transition: all 0.2s;
 }
 .btn-print {
   background: var(--gold);
   color: #080808;
 }
-.btn-print:hover { background: #F0C060; transform: translateY(-1px); }
-.btn-back {
-  border: 1px solid var(--bd);
+.btn-print:hover { background: #F0C060; transform: translateY(-2px); }
+.btn-download {
+  background: var(--bg4);
   color: var(--wh2);
+  border: 1px solid var(--bd) !important;
 }
-.btn-back:hover { background: var(--bg4); border-color: var(--mu); transform: translateY(-1px); }
+.btn-download:hover { background: var(--bg3); border-color: var(--mu); transform: translateY(-2px); }
 @media print {
   .nav, .site-footer, .cert-footer, .dash-header { display: none !important; }
   .certificate-wrap { margin: 0; padding: 0; }
@@ -144,6 +164,8 @@
   body { background: #fff; }
   .cert-name { color: #000; }
   .cert-body p { color: #333; }
+  .cert-signature { border-top-color: #ccc; }
+  .cert-signature p { color: #666; }
 }
 @media (max-width:500px) {
   .certificate { padding: 1.5rem 1rem; }
@@ -154,10 +176,10 @@
 {% block content %}
 <div class="page-content">
   <div class="certificate-wrap" id="certificate">
-    <div class="certificate">
+    <div class="certificate" id="certificate-content">
       <div class="cert-header">
         <div class="cert-seal">🏆</div>
-        <div class="cert-title">CERTIFICAT</div>
+        <div class="cert-title">CERTIFICAT DE RÉUSSITE</div>
         <div class="cert-sub">CodeMentor AI — Plateforme d'apprentissage</div>
       </div>
       <div class="cert-body">
@@ -170,11 +192,23 @@
           <span>Date : <strong>{{ acces.date_examen|date:"d F Y" }}</strong></span>
         </div>
       </div>
-      <div class="cert-footer">
-        <a href="#" onclick="window.print();return false" class="btn-print">🖨️ Imprimer</a>
-        <a href="{% url 'formation_detail' slug=formation.slug %}" class="btn-back">📚 Retour aux cours</a>
+      <div class="cert-signature">
+        <p>Ce certificat est délivré par</p>
+        <div class="sig-line">CodeMentor AI</div>
+        <p>Plateforme intelligente d'apprentissage du développement informatique</p>
       </div>
+    </div>
+    <div class="cert-footer">
+      <button onclick="window.print();return false" class="btn-print">🖨️ Imprimer le certificat</button>
+      <button onclick="telechargerPDF()" class="btn-download">⬇️ Télécharger (PDF)</button>
     </div>
   </div>
 </div>
+{% endblock %}
+{% block extra_js %}
+<script>
+function telechargerPDF() {
+  window.print();
+}
+</script>
 {% endblock %}

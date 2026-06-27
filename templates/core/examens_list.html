@@ -13,7 +13,7 @@
   </div>
 
   {% for e in examens %}
-  <div class="card" style="margin-bottom:12px;border-top:3px solid {% if e.debloque %}#2ECC71{% else %}var(--bd){% endif %};transition:border-color 0.2s, box-shadow 0.2s">
+  <div class="card" style="margin-bottom:12px;border-top:3px solid {% if e.examen_reussi %}#D4A843{% elif e.debloque %}#2ECC71{% else %}var(--bd){% endif %};transition:border-color 0.2s, box-shadow 0.2s">
     <div style="display:flex;flex-wrap:wrap;gap:1rem;align-items:flex-start">
 
       <div style="flex-shrink:0;font-size:3rem;width:64px;text-align:center">{{ e.emoji }}</div>
@@ -38,10 +38,15 @@
       </div>
 
       <div style="flex-shrink:0;display:flex;flex-direction:column;gap:6px;align-items:flex-end;min-width:180px">
-        {% if e.debloque and not e.examen_passe %}
+        {% if e.examen_reussi %}
+          <span style="display:inline-flex;align-items:center;gap:5px;font-size:12px;color:#2ECC71;font-weight:600;background:rgba(46,204,113,0.1);padding:4px 12px;border-radius:20px;border:1px solid rgba(46,204,113,0.2)">✅ Certification obtenue</span>
+          <span style="font-size:12px;color:var(--wh2)">🏆 Examen réussi</span>
+          {% if e.date_examen %}
+          <span style="font-size:11px;color:var(--mu)">📅 {{ e.date_examen|date:"d/m/Y" }}</span>
+          {% endif %}
+          <a href="{% url 'certificat' slug=e.slug %}" class="btn" style="background:var(--gold);color:#080808;padding:8px 20px;border-radius:6px;font-size:12px;font-weight:600;text-decoration:none;display:inline-flex;align-items:center;gap:6px;transition:background 0.2s" onmouseover="this.style.background='#F0C060'" onmouseout="this.style.background='var(--gold)'">📄 Voir le certificat</a>
+        {% elif e.debloque and not e.examen_passe %}
           <a href="{% url 'examen_final' %}?formation={{ e.slug }}" class="btn" style="background:#2ECC71;color:#fff;padding:10px 24px;border-radius:6px;font-size:13px;font-weight:600;text-decoration:none;display:inline-flex;align-items:center;gap:6px;transition:background 0.2s" onmouseover="this.style.background='#27AE60'" onmouseout="this.style.background='#2ECC71'">🚀 Démarrer l'examen</a>
-        {% elif e.examen_passe and e.examen_reussi %}
-          <span style="font-size:13px;color:#2ECC71;font-weight:600">🏆 Réussi ({{ e.score_examen }}%)</span>
         {% elif e.examen_passe and not e.examen_reussi %}
           <div style="text-align:right">
             <span style="font-size:13px;color:#E74C3C;font-weight:600">❌ Échoué</span>

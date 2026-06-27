@@ -309,3 +309,16 @@ class QuestionNiveau(Document):
     difficulte = StringField(choices=['facile', 'moyen', 'difficile'], default='facile')
 
     meta = {'collection': 'questions_niveau'}
+
+
+class StudentCertificate(Document):
+    """Certificat obtenu par un étudiant pour une matière."""
+    user_id = IntField(required=True)
+    formation_nom = StringField(required=True)
+    score = IntField(default=0)
+    obtained_at = DateTimeField(default=datetime.now)
+    exam_id = StringField(default='')
+
+    meta = {'collection': 'student_certificates', 'indexes': [
+        {'fields': ['user_id', 'formation_nom'], 'unique': True}
+    ]}

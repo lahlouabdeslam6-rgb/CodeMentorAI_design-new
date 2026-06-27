@@ -34,6 +34,7 @@
         <a href="{% url 'cours_list' %}" class="nav-link {% if request.resolver_match.url_name == 'cours_list' %}active{% endif %}">Cours</a>
         <a href="{% url 'tuteur' %}" class="nav-link {% if request.resolver_match.url_name == 'tuteur' %}active{% endif %}">Tuteur IA</a>
         <a href="{% url 'examens_list' %}" class="nav-link {% if request.resolver_match.url_name == 'examens_list' or request.resolver_match.url_name == 'examen_final' or request.resolver_match.url_name == 'examen_resultat' %}active{% endif %}">Examens</a>
+        <a href="{% url 'mes_certificats' %}" class="nav-link {% if request.resolver_match.url_name == 'mes_certificats' or request.resolver_match.url_name == 'certificat' %}active{% endif %}">🏅 Certificats</a>
         <a href="{% url 'profile_edit' %}" class="nav-link {% if request.resolver_match.url_name == 'profile_edit' %}active{% endif %}">Profil</a>
         <a href="{% url 'contact_admin' %}" class="nav-link {% if request.resolver_match.url_name == 'contact_admin' %}active{% endif %}">Contact</a>
         <a href="{% url 'logout' %}" class="nav-link">Déconnexion</a>

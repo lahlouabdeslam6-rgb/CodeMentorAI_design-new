@@ -3,7 +3,7 @@ from django.contrib import messages
 from django.contrib.auth.models import User
 from mongoengine import DoesNotExist
 from .decorators import professor_required
-from .models import Profil, Cours, Lesson, Exercice, Resolution, Progression, Activite, FormationProgress
+from .models import Profil, Cours, Lesson, Exercice, Resolution, Progression, Activite, FormationProgress, StudentCertificate
 
 
 def _get_prof_specialite(user_id):
@@ -65,6 +65,7 @@ def professor_dashboard(request):
                 stu_courses.append({'titre': c.titre, 'slug': c.slug})
         if stu_courses:
             fp = FormationProgress.objects(user_id=p.user_id, formation_nom=specialite).first() if specialite else None
+            cert = StudentCertificate.objects(user_id=p.user_id, formation_nom=specialite).first() if specialite else None
             student_list.append({
                 'username': user_model.username,
                 'fullname': p.fullname or user_model.username,
@@ -74,6 +75,9 @@ def professor_dashboard(request):
                 'courses': stu_courses,
                 'xp_formation': fp.xp if fp else 0,
                 'course_count': len(stu_courses),
+                'certifie': cert is not None,
+                'cert_score': cert.score if cert else None,
+                'cert_date': cert.obtained_at if cert else None,
             })
 
     student_list.sort(key=lambda x: x['xp_formation'], reverse=True)
@@ -566,6 +570,7 @@ def professor_students(request):
                 stu_courses.append({'titre': c.titre, 'slug': c.slug})
         fp = FormationProgress.objects(user_id=p.user_id, formation_nom=specialite).first() if specialite else None
         xp_formation = fp.xp if fp else 0
+        cert = StudentCertificate.objects(user_id=p.user_id, formation_nom=specialite).first() if specialite else None
         student_list.append({
             'user_id': p.user_id,
             'username': user_model.username,
@@ -579,6 +584,9 @@ def professor_students(request):
             'formation_nom': specialite or '',
             'courses': stu_courses,
             'course_count': total_specialite,
+            'certifie': cert is not None,
+            'cert_score': cert.score if cert else None,
+            'cert_date': cert.obtained_at if cert else None,
         })
 
     return render(request, 'professor/student_list.html', {
