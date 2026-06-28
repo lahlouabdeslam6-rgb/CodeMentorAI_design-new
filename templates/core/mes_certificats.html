@@ -86,121 +86,224 @@
   position: fixed;
   z-index: 1000;
   inset: 0;
-  background: rgba(0,0,0,0.7);
-  backdrop-filter: blur(4px);
+  background: rgba(0,0,0,0.75);
+  backdrop-filter: blur(6px);
   align-items: center;
   justify-content: center;
-  padding: 1rem;
+  padding: 1.5rem;
 }
 .cert-modal.open { display: flex; }
 .cert-modal-content {
-  background: #0d0d0d;
-  border: 1px solid rgba(212,168,67,0.3);
-  border-radius: 20px;
-  max-width: 640px;
+  background: #fff;
+  max-width: 700px;
   width: 100%;
   position: relative;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
-  animation: modalIn 0.25s ease;
-}
-@keyframes modalIn {
-  from { opacity: 0; transform: scale(0.95) translateY(10px); }
-  to { opacity: 1; transform: scale(1) translateY(0); }
-}
-.cert-modal-inner {
+  box-shadow: 0 30px 80px rgba(0,0,0,0.5);
+  animation: modalIn 0.3s ease;
   padding: 2.5rem 2rem;
 }
-.cert-modal-seal {
-  width: 64px; height: 64px;
+@keyframes modalIn {
+  from { opacity: 0; transform: scale(0.92) translateY(20px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+/* Outer decorative border */
+.cert-modal-content::before {
+  content: '';
+  position: absolute;
+  inset: 8px;
+  border: 1.5px solid #c9a84c;
+  pointer-events: none;
+}
+.cert-modal-content::after {
+  content: '';
+  position: absolute;
+  inset: 14px;
+  border: 0.5px solid #d4c49a;
+  pointer-events: none;
+}
+/* Corner ornaments for modal */
+.cert-modal-corners { position: absolute; inset: 8px; pointer-events: none; }
+.cert-corner { position: absolute; width: 30px; height: 30px; }
+.cert-corner::before, .cert-corner::after {
+  content: ''; position: absolute; background: #c9a84c;
+}
+.cert-corner-tl { top: 0; left: 0; }
+.cert-corner-tl::before { top: 0; left: 0; width: 20px; height: 1.5px; }
+.cert-corner-tl::after { top: 0; left: 0; width: 1.5px; height: 20px; }
+.cert-corner-tr { top: 0; right: 0; }
+.cert-corner-tr::before { top: 0; right: 0; width: 20px; height: 1.5px; }
+.cert-corner-tr::after { top: 0; right: 0; width: 1.5px; height: 20px; }
+.cert-corner-bl { bottom: 0; left: 0; }
+.cert-corner-bl::before { bottom: 0; left: 0; width: 20px; height: 1.5px; }
+.cert-corner-bl::after { bottom: 0; left: 0; width: 1.5px; height: 20px; }
+.cert-corner-br { bottom: 0; right: 0; }
+.cert-corner-br::before { bottom: 0; right: 0; width: 20px; height: 1.5px; }
+.cert-corner-br::after { bottom: 0; right: 0; width: 1.5px; height: 20px; }
+
+/* Modal certificate inner */
+.modal-logo {
+  text-align: center;
+  margin-bottom: 0.75rem;
+  font-family: 'Times New Roman', serif;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1a1a2e;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.modal-logo span {
+  display: inline-block;
+  background: #1a1a2e;
+  color: #fff;
+  padding: 0.15rem 0.85rem;
+  font-size: 0.8rem;
+  letter-spacing: 0.2em;
+  border-radius: 2px;
+}
+.modal-divider {
+  width: 70px;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #c9a84c, transparent);
+  margin: 0.6rem auto;
+}
+.modal-title {
+  text-align: center;
+  font-family: 'Times New Roman', serif;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1a1a2e;
+  letter-spacing: 0.06em;
+  margin-bottom: 0.15rem;
+}
+.modal-title-sub {
+  text-align: center;
+  font-size: 9px;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-family: Arial, sans-serif;
+  font-weight: 400;
+  margin-bottom: 1rem;
+}
+.modal-body {
+  text-align: center;
+  margin-bottom: 1rem;
+}
+.modal-body p {
+  font-size: 11px;
+  color: #555;
+  line-height: 1.6;
+  margin-bottom: 0.35rem;
+  font-family: Arial, sans-serif;
+  font-weight: 300;
+}
+.modal-student {
+  font-family: 'Times New Roman', serif;
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #1a1a2e;
+  margin: 0.5rem 0;
+  line-height: 1.2;
+}
+.modal-formation {
+  display: inline-block;
+  background: linear-gradient(135deg, #1a1a2e, #2d2d5e);
+  color: #fff;
+  padding: 0.4rem 1.6rem;
+  font-size: 12px;
+  font-weight: 500;
+  border-radius: 30px;
+  font-family: Arial, sans-serif;
+  letter-spacing: 0.04em;
+  margin-bottom: 0.75rem;
+}
+.modal-meta {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  flex-wrap: wrap;
+  margin-top: 0.75rem;
+}
+.modal-meta-item { text-align: center; }
+.modal-meta-item .label {
+  font-size: 8px;
+  color: #999;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-family: Arial, sans-serif;
+  font-weight: 500;
+}
+.modal-meta-item .value {
+  font-size: 12px;
+  color: #1a1a2e;
+  font-weight: 600;
+  font-family: Arial, sans-serif;
+  margin-top: 2px;
+}
+.modal-certid {
+  font-size: 8px;
+  color: #bbb;
+  text-align: center;
+  font-family: Arial, sans-serif;
+  letter-spacing: 0.05em;
+  margin-bottom: 1rem;
+  font-weight: 300;
+}
+.modal-sig-area {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1.5rem;
+  padding-top: 0.75rem;
+  border-top: 0.5px solid #e0e0e0;
+  margin-bottom: 1rem;
+}
+.modal-sig-item { text-align: center; }
+.modal-sig-line {
+  width: 120px;
+  height: 0.5px;
+  background: #bbb;
+  margin-bottom: 0.3rem;
+}
+.modal-sig-label {
+  font-size: 8px;
+  color: #999;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-family: Arial, sans-serif;
+  font-weight: 400;
+}
+.modal-sig-name {
+  font-size: 10px;
+  color: #1a1a2e;
+  font-weight: 500;
+  font-family: 'Times New Roman', serif;
+}
+.modal-seal {
+  position: absolute;
+  bottom: 30px;
+  right: 30px;
+  width: 60px;
+  height: 60px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(212,168,67,0.15), transparent);
-  border: 2px solid var(--gold);
+  border: 2px solid #c9a84c;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 2rem;
-  margin: 0 auto 1rem;
+  font-size: 1.5rem;
+  background: #fff;
+  opacity: 0.8;
+  pointer-events: none;
 }
-.cert-modal-title {
-  font-family: var(--fd);
-  font-size: 1.4rem;
-  font-weight: 700;
-  color: var(--gold);
-  text-align: center;
-  margin-bottom: 0.25rem;
-}
-.cert-modal-sub {
-  font-size: 10px;
-  color: var(--mu);
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  text-align: center;
-  font-family: var(--fc);
-  margin-bottom: 1.5rem;
-}
-.cert-modal-body {
-  text-align: center;
-}
-.cert-modal-body p {
-  font-size: 12px;
-  color: var(--wh2);
-  line-height: 1.8;
-  margin-bottom: 0.5rem;
-}
-.cert-modal-student {
-  font-family: var(--fd);
-  font-size: 1.6rem;
-  font-weight: 700;
-  color: var(--wh);
-  margin-bottom: 0.5rem;
-}
-.cert-modal-formation {
-  display: inline-block;
-  background: rgba(212,168,67,0.1);
-  border: 1px solid rgba(212,168,67,0.2);
-  border-radius: 40px;
-  padding: 0.3rem 1.25rem;
-  font-size: 13px;
-  color: var(--gold);
-  font-weight: 500;
-  margin-bottom: 1rem;
-}
-.cert-modal-details {
-  display: flex;
-  justify-content: center;
-  gap: 1.5rem;
-  flex-wrap: wrap;
-  font-size: 12px;
-  color: var(--mu);
-  margin-bottom: 1.25rem;
-}
-.cert-modal-details span strong { color: var(--wh2); }
-.cert-modal-sig {
-  text-align: center;
-  padding-top: 1rem;
-  border-top: 1px solid var(--bd);
-  margin-bottom: 1.25rem;
-}
-.cert-modal-sig p {
-  font-size: 10px;
-  color: var(--mu);
-  font-family: var(--fc);
-  letter-spacing: 0.05em;
-  margin: 0;
-}
-.cert-modal-sig .sig-line {
-  font-size: 12px;
-  color: var(--gold);
-  font-weight: 500;
-  font-family: var(--fd);
-}
-.cert-modal-actions {
+.modal-actions {
   display: flex;
   gap: 8px;
   justify-content: center;
   flex-wrap: wrap;
+  position: relative;
+  z-index: 1;
 }
-.cert-modal-actions button {
+.modal-actions button {
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -213,10 +316,7 @@
   font-family: var(--fb);
   transition: all 0.2s;
 }
-.btn-modal-print {
-  background: var(--gold);
-  color: #080808;
-}
+.btn-modal-print { background: var(--gold); color: #080808; }
 .btn-modal-print:hover { background: #F0C060; }
 .btn-modal-dl {
   background: var(--bg4);
@@ -234,8 +334,12 @@
 @media print {
   body * { visibility: hidden; }
   .modal-print-area, .modal-print-area * { visibility: visible; }
-  .modal-print-area { display: block !important; position: absolute; left: 0; top: 0; width: 100%; }
+  .modal-print-area { display: block !important; position: absolute; left: 0; top: 0; width: 100%; background: #fff; }
+  .modal-print-area .cp-certificate { max-width: 800px; margin: 0 auto; padding: 2rem; }
   .cert-modal { display: none !important; }
+  .modal-print-area .cp-certificate { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .modal-print-area .cp-logo span { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .modal-print-area .cp-formation { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 }
 </style>
 {% endblock %}
@@ -254,7 +358,8 @@
          data-emoji="{{ item.formation.emoji|default:'📜' }}"
          data-score="{{ item.certificat.score }}"
          data-date="{{ item.certificat.obtained_at|date:'d/m/Y' }}"
-         data-student="{{ profil.fullname|default:profil.username }}">
+         data-student="{{ profil.fullname|default:profil.username }}"
+         data-certid="{{ item.certificat.id }}">
       <div class="cert-emoji">{{ item.formation.emoji|default:'📜' }}</div>
       <div class="cert-info">
         <div class="cert-name">{{ item.certificat.formation_nom }}</div>
@@ -279,27 +384,41 @@
 <!-- Modal certificat -->
 <div class="cert-modal" id="certModal">
   <div class="cert-modal-content" id="certModalContent">
-    <div class="cert-modal-inner">
-      <div class="cert-modal-seal" id="modalSeal">🏆</div>
-      <div class="cert-modal-title">CERTIFICAT DE RÉUSSITE</div>
-      <div class="cert-modal-sub">CodeMentor AI — Plateforme d'apprentissage</div>
-      <div class="cert-modal-body">
-        <p>Ce certificat est décerné à</p>
-        <div class="cert-modal-student" id="modalStudent"></div>
-        <p>pour avoir réussi avec succès l'examen de certification</p>
-        <div class="cert-modal-formation" id="modalFormation"></div>
-        <div class="cert-modal-details" id="modalDetails"></div>
+    <div class="cert-modal-corners">
+      <div class="cert-corner cert-corner-tl"></div>
+      <div class="cert-corner cert-corner-tr"></div>
+      <div class="cert-corner cert-corner-bl"></div>
+      <div class="cert-corner cert-corner-br"></div>
+    </div>
+    <div class="modal-seal" id="modalSeal">🏆</div>
+    <div class="modal-logo"><span>CodeMentor AI</span></div>
+    <div class="modal-divider"></div>
+    <div class="modal-title">CERTIFICAT DE RÉUSSITE</div>
+    <div class="modal-title-sub">Plateforme intelligente d'apprentissage du développement</div>
+    <div class="modal-body">
+      <p>Ce certificat est décerné à</p>
+      <div class="modal-student" id="modalStudent"></div>
+      <p>pour avoir validé avec succès la formation</p>
+      <div class="modal-formation" id="modalFormation"></div>
+      <div class="modal-meta" id="modalMeta"></div>
+    </div>
+    <div class="modal-certid" id="modalCertId"></div>
+    <div class="modal-sig-area">
+      <div class="modal-sig-item">
+        <div class="modal-sig-line"></div>
+        <div class="modal-sig-label">Signature numérique</div>
+        <div class="modal-sig-name">CodeMentor AI</div>
       </div>
-      <div class="cert-modal-sig">
-        <p>Ce certificat est délivré par</p>
-        <div class="sig-line">CodeMentor AI</div>
-        <p>Plateforme intelligente d'apprentissage du développement informatique</p>
+      <div class="modal-sig-item">
+        <div class="modal-sig-line"></div>
+        <div class="modal-sig-label">Autorité de certification</div>
+        <div class="modal-sig-name">Plateforme d'apprentissage</div>
       </div>
-      <div class="cert-modal-actions">
-        <button onclick="imprimerCertificat()" class="btn-modal-print">🖨️ Imprimer le certificat</button>
-        <button onclick="telechargerPDF()" class="btn-modal-dl">⬇️ Télécharger (PDF)</button>
-        <button onclick="fermerCertificat()" class="btn-modal-close">❌ Fermer</button>
-      </div>
+    </div>
+    <div class="modal-actions">
+      <button onclick="imprimerCertificat()" class="btn-modal-print">🖨️ Imprimer le certificat</button>
+      <button onclick="telechargerPDF()" class="btn-modal-dl">⬇️ Télécharger (PDF)</button>
+      <button onclick="fermerCertificat()" class="btn-modal-close">❌ Fermer</button>
     </div>
   </div>
 </div>
@@ -318,13 +437,15 @@ function ouvrirCertificat(btn) {
     formation: card.dataset.formation,
     emoji: card.dataset.emoji,
     score: card.dataset.score,
-    date: card.dataset.date
+    date: card.dataset.date,
+    certid: card.dataset.certid
   };
   document.getElementById('modalStudent').textContent = currentData.student;
-  document.getElementById('modalFormation').innerHTML = currentData.emoji + ' Certification ' + currentData.formation;
-  document.getElementById('modalDetails').innerHTML =
-    '<span>Score : <strong>' + currentData.score + '%</strong></span>' +
-    '<span>Date : <strong>' + currentData.date + '</strong></span>';
+  document.getElementById('modalFormation').innerHTML = currentData.emoji + ' ' + currentData.formation;
+  document.getElementById('modalMeta').innerHTML =
+    '<div class="modal-meta-item"><div class="label">Score obtenu</div><div class="value">' + currentData.score + '%</div></div>' +
+    '<div class="modal-meta-item"><div class="label">Date d\'obtention</div><div class="value">' + currentData.date + '</div></div>';
+  document.getElementById('modalCertId').textContent = 'Certificat n° ' + currentData.certid + ' · CodeMentor AI';
   document.getElementById('certModal').classList.add('open');
   document.body.style.overflow = 'hidden';
 }
@@ -339,19 +460,41 @@ function imprimerCertificat() {
   if (!currentData) return;
   var pa = document.getElementById('printArea');
   pa.innerHTML =
-    '<div style="text-align:center;padding:2rem;font-family:sans-serif">' +
-    '<div style="font-size:2.5rem;margin-bottom:1rem">🏆</div>' +
-    '<h1 style="font-size:1.6rem;color:#D4A843;margin-bottom:0.25rem">CERTIFICAT DE RÉUSSITE</h1>' +
-    '<p style="font-size:10px;color:#999;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:1.5rem">CodeMentor AI — Plateforme d\'apprentissage</p>' +
-    '<p style="font-size:13px;margin-bottom:0.5rem">Ce certificat est décerné à</p>' +
-    '<h2 style="font-size:1.8rem;font-weight:700;margin-bottom:0.5rem">' + currentData.student + '</h2>' +
-    '<p style="font-size:13px;margin-bottom:0.5rem">pour avoir réussi avec succès l\'examen de certification</p>' +
-    '<div style="display:inline-block;border:1px solid #D4A843;border-radius:40px;padding:0.3rem 1.25rem;font-size:13px;color:#D4A843;margin-bottom:1rem">' + currentData.emoji + ' Certification ' + currentData.formation + '</div>' +
-    '<div style="font-size:12px;color:#666;margin-bottom:1.5rem">Score : <strong>' + currentData.score + '%</strong> &nbsp;·&nbsp; Date : <strong>' + currentData.date + '</strong></div>' +
-    '<div style="border-top:1px solid #ddd;padding-top:1rem;font-size:10px;color:#999">' +
-    '<p style="margin:0">Ce certificat est délivré par</p>' +
-    '<p style="font-size:12px;color:#D4A843;font-weight:500;margin:4px 0">CodeMentor AI</p>' +
-    '<p style="margin:0">Plateforme intelligente d\'apprentissage du développement informatique</p></div></div>';
+    '<div class="cp-certificate" style="background:#fff;padding:2.5rem 2rem;position:relative;font-family:Arial,sans-serif;max-width:800px;margin:0 auto">' +
+    /* borders */
+    '<div style="position:absolute;inset:10px;border:1.5px solid #c9a84c;pointer-events:none"></div>' +
+    '<div style="position:absolute;inset:16px;border:0.5px solid #d4c49a;pointer-events:none"></div>' +
+    /* corner ornaments */
+    '<div style="position:absolute;top:10px;left:10px;width:24px;height:1.5px;background:#c9a84c"></div>' +
+    '<div style="position:absolute;top:10px;left:10px;width:1.5px;height:24px;background:#c9a84c"></div>' +
+    '<div style="position:absolute;top:10px;right:10px;width:24px;height:1.5px;background:#c9a84c"></div>' +
+    '<div style="position:absolute;top:10px;right:10px;width:1.5px;height:24px;background:#c9a84c"></div>' +
+    '<div style="position:absolute;bottom:10px;left:10px;width:24px;height:1.5px;background:#c9a84c"></div>' +
+    '<div style="position:absolute;bottom:10px;left:10px;width:1.5px;height:24px;background:#c9a84c"></div>' +
+    '<div style="position:absolute;bottom:10px;right:10px;width:24px;height:1.5px;background:#c9a84c"></div>' +
+    '<div style="position:absolute;bottom:10px;right:10px;width:1.5px;height:24px;background:#c9a84c"></div>' +
+    /* seal */
+    '<div style="position:absolute;bottom:40px;right:35px;width:65px;height:65px;border-radius:50%;border:2px solid #c9a84c;display:flex;align-items:center;justify-content:center;font-size:1.8rem;background:#fff;opacity:0.85">🏆</div>' +
+    /* content */
+    '<div class="cp-logo" style="text-align:center;margin-bottom:0.75rem;font-family:\'Times New Roman\',serif;font-size:1rem;font-weight:600;color:#1a1a2e;letter-spacing:0.12em;text-transform:uppercase">' +
+    '<span style="display:inline-block;background:#1a1a2e;color:#fff;padding:0.15rem 0.85rem;font-size:0.8rem;letter-spacing:0.2em;border-radius:2px">CodeMentor AI</span></div>' +
+    '<div style="width:70px;height:2px;background:linear-gradient(90deg,transparent,#c9a84c,transparent);margin:0.6rem auto"></div>' +
+    '<h1 style="text-align:center;font-family:\'Times New Roman\',serif;font-size:1.5rem;font-weight:700;color:#1a1a2e;letter-spacing:0.06em;margin:0 0 0.15rem 0">CERTIFICAT DE RÉUSSITE</h1>' +
+    '<p style="text-align:center;font-size:9px;color:#888;text-transform:uppercase;letter-spacing:0.12em;font-family:Arial,sans-serif;margin:0 0 1rem 0">Plateforme intelligente d\'apprentissage du développement</p>' +
+    '<div style="text-align:center;margin-bottom:1rem">' +
+    '<p style="font-size:11px;color:#555;line-height:1.6;margin:0 0 0.35rem 0;font-family:Arial,sans-serif">Ce certificat est décerné à</p>' +
+    '<h2 style="font-family:\'Times New Roman\',serif;font-size:1.8rem;font-weight:700;color:#1a1a2e;margin:0.5rem 0;line-height:1.2">' + currentData.student + '</h2>' +
+    '<p style="font-size:11px;color:#555;line-height:1.6;margin:0 0 0.35rem 0;font-family:Arial,sans-serif">pour avoir validé avec succès la formation</p>' +
+    '<div class="cp-formation" style="display:inline-block;background:linear-gradient(135deg,#1a1a2e,#2d2d5e);color:#fff;padding:0.4rem 1.6rem;font-size:12px;font-weight:500;border-radius:30px;font-family:Arial,sans-serif;letter-spacing:0.04em;margin-bottom:0.75rem">' + currentData.emoji + ' ' + currentData.formation + '</div>' +
+    '<div style="display:flex;justify-content:center;gap:2rem;flex-wrap:wrap;margin-top:0.75rem">' +
+    '<div style="text-align:center"><div style="font-size:8px;color:#999;text-transform:uppercase;letter-spacing:0.12em;font-family:Arial,sans-serif;font-weight:500">Score obtenu</div><div style="font-size:12px;color:#1a1a2e;font-weight:600;font-family:Arial,sans-serif;margin-top:2px">' + currentData.score + '%</div></div>' +
+    '<div style="text-align:center"><div style="font-size:8px;color:#999;text-transform:uppercase;letter-spacing:0.12em;font-family:Arial,sans-serif;font-weight:500">Date d\'obtention</div><div style="font-size:12px;color:#1a1a2e;font-weight:600;font-family:Arial,sans-serif;margin-top:2px">' + currentData.date + '</div></div>' +
+    '</div></div>' +
+    '<p style="font-size:8px;color:#bbb;text-align:center;font-family:Arial,sans-serif;letter-spacing:0.05em;font-weight:300;margin:0 0 1rem 0">Certificat n° ' + currentData.certid + ' · CodeMentor AI</p>' +
+    '<div style="display:flex;justify-content:center;align-items:center;gap:1.5rem;padding-top:0.75rem;border-top:0.5px solid #e0e0e0">' +
+    '<div style="text-align:center"><div style="width:120px;height:0.5px;background:#bbb;margin:0 auto 0.3rem auto"></div><div style="font-size:8px;color:#999;text-transform:uppercase;letter-spacing:0.1em;font-family:Arial,sans-serif">Signature numérique</div><div style="font-size:10px;color:#1a1a2e;font-weight:500;font-family:\'Times New Roman\',serif;margin-top:2px">CodeMentor AI</div></div>' +
+    '<div style="text-align:center"><div style="width:120px;height:0.5px;background:#bbb;margin:0 auto 0.3rem auto"></div><div style="font-size:8px;color:#999;text-transform:uppercase;letter-spacing:0.1em;font-family:Arial,sans-serif">Autorité de certification</div><div style="font-size:10px;color:#1a1a2e;font-weight:500;font-family:\'Times New Roman\',serif;margin-top:2px">Plateforme d\'apprentissage</div></div>' +
+    '</div></div>';
   window.print();
   pa.innerHTML = '';
 }
