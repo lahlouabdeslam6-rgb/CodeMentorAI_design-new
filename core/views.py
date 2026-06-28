@@ -1441,6 +1441,9 @@ def mes_certificats(request):
     certificats = StudentCertificate.objects(user_id=uid).order_by('-obtained_at')
     cert_list = []
     for c in certificats:
+        acces = AccesExamen.objects(user_id=uid, formation_nom=c.formation_nom).first()
+        if not acces or not acces.examen_reussi:
+            continue
         formation = Formation.objects(nom=c.formation_nom).first()
         cert_list.append({
             'certificat': c,
